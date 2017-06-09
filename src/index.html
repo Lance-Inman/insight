@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DPS Insight V0.0.1</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:300,400" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="log_parser.js"></script>
+</head>
+<body>
+    <div id="input-panel">
+        <input type="file" id="file-input" multiple onchange="readFiles(this.files)" />
+        <span id="status-panel">Status: <a id="status">waiting for input</a></span>
+        <div class="options-dropdown">
+            <button class="options-dropdown-trigger" onclick="toggleDropdown(&quot;options-dropdown-content&quot;)">Options</button>
+            <div class="options-dropdown-content show" id="options-dropdown-content">
+                <div><input type="text" name="custom" id="custom-hex-input" placeholder="Custom ex: &quot;0x1, 0x3&quot;"></div>
+                <div><input type="checkbox" name="hex-code" id="0x10A" value="0x10A">
+                <label for="0x10A">0x10A: Board Temp</label></div>
+                <div><input type="checkbox" name="hex-code" id="0x114" value="0x114">
+                <label for="0x114">0x114: Battery V</label></div>
+                <div><input type="checkbox" name="hex-code" id="0x115" value="0x115">
+                <label for="0x115">0x115: Turbine V</label></div>
+                <div><input type="checkbox" name="hex-code" id="0x11A" value="0x11A">
+                <label for="0x11A">0x11A: Pressure Info</label></div>
+                <div><input type="checkbox" name="hex-code" id="0x11B" value="0x11B">
+                <label for="0x11B">0x11B: RPM</label></div>
+                <div><input type="checkbox" name="hex-code" id="0x100" value="0x100">
+                <label for="0x100">0x100: EOT Transmit</label></div>
+                <div><input type="checkbox" name="hex-code" id="0x120" value="0x120">
+                <label for="0x120">0x120: EOT Receive</label></div>
+                <div><input type="checkbox" name="hex-code" id="0x1" value="0x1">
+                <label for="0x1">0x1: RTC Not Set</label></div>
+                <div><input type="checkbox" name="hex-code" id="0x3" value="0x3">
+                <label for="0x3">0x3: Brake Solenoid Not Connected</label></div>
+            </div>
+        </div>
+    </div>
+    <div id="results-panel"></div>
+</body>
+</html>
