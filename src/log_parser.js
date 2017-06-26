@@ -1,13 +1,14 @@
 var etd_list = [];
 
 function readFiles(files) {
-    for(var i = 0; i < files.length; i++) {
-        readFile(files[i]);
-    }
-    toggleDropdown("options-dropdown-content");
-}
+    var index = 0;
 
-function readFile(file) {
+    document.getElementById("status").innerHTML = "Loading files...";
+    document.getElementById("input-panel").style.backgroundColor = "#FFEB3B";
+    files = [].slice.call(files).sort(chronCompare);
+    document.getElementById("status").innerHTML = "Parsing files...";
+    document.getElementById("input-panel").style.backgroundColor = "#FFEB3B";
+
     var reader = new FileReader();
         reader.onerror =
             function() {
@@ -23,25 +24,27 @@ function readFile(file) {
             };
         reader.onloadstart =
             function() {
-                document.getElementById("status").innerHTML = "Loading file...";
-                document.getElementById("input-panel").style.backgroundColor = "#FFEB3B";
             };
+        reader.onload =
+            function() {
+                if (index+1 < files.length) {
+                    etd_list = parseETDFile(reader, etd_list);
+                    reader.readAsText(files[++index]);
+                } else {
+                    document.getElementById("results-panel").innerHTML = "";
+                    for(var i = 0; i < etd_list.length; i++) {
+                        etd_list[i].print();
+                        addTable(etd_list[i]);
+                    }
+                    document.getElementById("status").innerHTML = "Done";
+                    document.getElementById("input-panel").style.backgroundColor = "#4CAF50";
+                    toggleDropdown("options-dropdown-content");
+                }
+            }
         reader.onloadend =
             function() {
-                console.log("Reading operation successfully completed");
-                document.getElementById("status").innerHTML = "Parsing file...";
-                document.getElementById("input-panel").style.backgroundColor = "#d3ff45";
-                etd_list = parseETDFile(reader, etd_list);
-                document.getElementById("results-panel").innerHTML = "";
-                for(var i = 0; i < etd_list.length; i++) {
-                    etd_list[i].print();
-                    addTable(etd_list[i]);
-                }
-
-                document.getElementById("status").innerHTML = "Done";
-                document.getElementById("input-panel").style.backgroundColor = "#4CAF50";
             };
-    reader.readAsText(file);
+    reader.readAsText(files[0]);
 }
 
 function addTable(etd) {
@@ -50,10 +53,10 @@ function addTable(etd) {
     etdDropdown.setAttribute("class", "etd-dropdown");
     var etdButton = document.createElement("button");
     etdButton.appendChild(document.createTextNode("ID: " + etd.id + ", V: " + etd.firmware + ", SN: " + etd.sn));
-    etdButton.setAttribute("onclick", ("toggleDropdown("+(etd.sn).slice(0,15)+")"));
+    etdButton.setAttribute("onclick", ("toggleDropdown("+(etd.id+""+etd.firmware.replace('.', '')+""+etd.sn).slice(0,15)+")"));
     etdButton.setAttribute("class", "etd-dropdown-trigger");
     var etdDropdownContent = document.createElement("div");
-    etdDropdownContent.setAttribute("id", (""+etd.sn.slice(0,15)));
+    etdDropdownContent.setAttribute("id", (""+etd.id+""+etd.firmware.replace('.', '')+""+etd.sn).slice(0,15));
     etdDropdownContent.setAttribute("class", "etd-dropdown-content");
     etdDropdown.appendChild(etdButton);
 
@@ -66,10 +69,10 @@ function addTable(etd) {
         hexDropdown.setAttribute("class", "hex-dropdown");
         var hexButton = document.createElement("button");
         hexButton.appendChild(document.createTextNode(tracked_code.code+": "+tracked_code.logs.length));
-        hexButton.setAttribute("onclick", ("toggleDropdown("+(etd.sn+code_num).slice(1,16)+")"));
+        hexButton.setAttribute("onclick", ("toggleDropdown("+(etd.id+""+etd.firmware.replace('.', '')+""+etd.sn+""+code_num).slice(3,18)+")"));
         hexButton.setAttribute("class", "hex-dropdown-trigger");
         var hexDropdownContent = document.createElement("div");
-        hexDropdownContent.setAttribute("id", (""+(etd.sn+code_num).slice(1,16)));
+        hexDropdownContent.setAttribute("id", (""+(etd.id+""+etd.firmware.replace('.', '')+""+etd.sn+""+code_num).slice(3,18)));
         hexDropdownContent.setAttribute("class", "hex-dropdown-content");
         hexDropdown.appendChild(hexButton);
 
@@ -175,9 +178,9 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
         console.log("Firmware: " + this.firmware);
         console.log("Serial Number: " + this.sn);
         for(var code_num = 0; code_num < this.tracked_codes.length; code_num++) {
-            console.log("\t" + this.tracked_codes[code_num].code);
+            //console.log("\t" + this.tracked_codes[code_num].code);
             for(var log_count = 0; log_count < this.tracked_codes[code_num].logs.length; log_count++) {
-                console.log("\t\t" + this.tracked_codes[code_num].logs[log_count]);
+                //console.log("\t\t" + this.tracked_codes[code_num].logs[log_count]);
             }
         }
     }
@@ -276,4 +279,53 @@ function loadOptions(etd) {
     if(document.querySelector('input[value="0x120"]').checked) {
         etd.addCode("0x120");
     }
+}
+
+function chronCompare(a, b) {
+    a = a.name;
+    b = b.name;
+    var aYear = a.match(/(?:[0-9]+[A-Z]+|\G)([0-9]+)/);
+    var bYear = b.match(/(?:[0-9]+[A-Z]+|\G)([0-9]+)/);
+    if (aYear && bYear) {
+        aYear = parseInt(aYear[1]);
+        bYear = parseInt(bYear[1]);
+        if (aYear < bYear) {
+            return -1;
+        }
+        if (bYear < aYear) {
+            return 1;
+        }
+    }
+
+
+    var aMonth = a.match(/(?:[0-9]+|\G)([A-Z]+)/);
+    var bMonth = b.match(/(?:[0-9]+|\G)([A-Z]+)/);
+    if (aMonth && bMonth) {
+        aMonth = aMonth[1];
+        bMonth = bMonth[1];
+        if (aMonth != bMonth) {
+            var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            aMonth = months.indexOf(aMonth);
+            bMonth = months.indexOf(bMonth);
+            if (aMonth < 0 || bMonth < 0) {
+                return 0;
+            }
+            if (aMonth < bMonth) {
+                return -1;
+            }
+            if (bMonth < aMonth) {
+                return 1
+            }
+        }
+    }
+
+    var aDay = parseInt(a.match(/[0-9]+/));
+    var bDay = parseInt(b.match(/[0-9]+/));
+    if(aDay < bDay) {
+        return -1;
+    }
+    if(bDay < aDay) {
+        return 1;
+    }
+    return 0;
 }
