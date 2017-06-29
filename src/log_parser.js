@@ -40,7 +40,7 @@ function readFiles(files) {
                     document.getElementById("input-panel").style.backgroundColor = "#4CAF50";
                     toggleDropdown("options-dropdown-content");
                 }
-            }
+            };
         reader.onloadend =
             function() {
             };
@@ -145,14 +145,14 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
         obj.customer = customer.match(/(?:Customer ID: |\G)([A-Z]+)/)[0];
         obj.turbine_time = turbine_time.match(/(?:Turbine Time: |\G)([0-9]+.[0-9]+)/)[0];
         obj.battery_time = battery_time.match(/(?:Battery Time: |\G)([0-9]+.[0-9]+)/)[0];
-    } catch(err) {
+    } catch (err) {
         return null;
     }
 
     obj.tracked_codes = [];
 
     obj.addCode = function(code) {
-        this.tracked_codes.push(new createTrackedCode(code));
+        this.tracked_codes.push(createTrackedCode(code));
     };
 
     obj.parse = function(line) {
@@ -160,7 +160,7 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
         var code = values[2];
 
         for(var i = 0; i < this.tracked_codes.length; i++) {
-            if(this.tracked_codes[i].code == code) {
+            if(this.tracked_codes[i].code === code) {
                 this.tracked_codes[i].logs.push(line);
             }
         }
@@ -171,7 +171,7 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
         console.log(this.tracked_codes.length);
         console.log('logs.length');
         console.log(this.tracked_codes[0].logs.length);
-    }
+    };
 
     obj.print = function() {
         console.log("ID: " + this.id);
@@ -183,7 +183,7 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
                 //console.log("\t\t" + this.tracked_codes[code_num].logs[log_count]);
             }
         }
-    }
+    };
 
     return obj;
 }
@@ -205,7 +205,7 @@ function parseETDFile(reader, etd_list) {
         }
 
         // If a log header is found
-        if(line.charAt(0) == "-" && (line_num+7 < lines.length) && lines[line_num+1].charAt(0) == 'E') {
+        if(line.charAt(0) === "-" && (line_num+7 < lines.length) && lines[line_num+1].charAt(0) === 'E') {
             // Parse the header
             var id = lines[++line_num];
             var firmware = lines[++line_num];
@@ -226,9 +226,9 @@ function parseETDFile(reader, etd_list) {
                     var existing_etd = etd_list[etd_num];
 
                     // If a match is found, set the existing ETD at this_etd
-                    if (new_etd.id == existing_etd.id
-                        && new_etd.firmware == existing_etd.firmware
-                        && new_etd.sn == existing_etd.sn) {
+                    if (new_etd.id === existing_etd.id
+                        && new_etd.firmware === existing_etd.firmware
+                        && new_etd.sn === existing_etd.sn) {
                         match_found = true;
                         this_etd = existing_etd;
                         existing_etd.turbine_time = new_etd.turbine_time;
@@ -238,7 +238,7 @@ function parseETDFile(reader, etd_list) {
                 }
 
                 // If an existing ETD could not be found, set the new ETD as this_etd
-                if(match_found == false) {
+                if(match_found === false) {
                     etd_list.push(new_etd);
                     this_etd = new_etd;
                     loadOptions(this_etd);
@@ -303,7 +303,7 @@ function chronCompare(a, b) {
     if (aMonth && bMonth) {
         aMonth = aMonth[1];
         bMonth = bMonth[1];
-        if (aMonth != bMonth) {
+        if (aMonth !== bMonth) {
             var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
             aMonth = months.indexOf(aMonth);
             bMonth = months.indexOf(bMonth);
@@ -321,10 +321,10 @@ function chronCompare(a, b) {
 
     var aDay = parseInt(a.match(/[0-9]+/));
     var bDay = parseInt(b.match(/[0-9]+/));
-    if(aDay < bDay) {
+    if (aDay < bDay) {
         return -1;
     }
-    if(bDay < aDay) {
+    if (bDay < aDay) {
         return 1;
     }
     return 0;
