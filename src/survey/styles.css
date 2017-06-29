@@ -1,0 +1,37 @@
+html, body {
+    font-family: sans-serif;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#map {
+    height: 100%;
+}
+
+#input-panel {
+    width: 100%;
+    height: auto;
+    z-index: 5;
+    background-color: #4CAF50;
+}
+
+#status-panel {
+    padding-right: 15px;
+    margin: 0 auto;
+    float: right;
+}
+
+#input {
+
+}
+
+#map-style-panel {
+    position: absolute;
+    padding-top: 9px;
+    left: 0;
+    right: 50%;
+    width: 100%;
+    text-align: center;
+    z-index: 5;
+}
