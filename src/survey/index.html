@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPS Insight V0.0.2</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSTvIUmwtPc_qttHEwmEDfbhPNLUYv2XM&libraries=visualization">
+    </script>
+    <script src="survey_parser.js"></script>
+</head>
+
+<body>
+<div id="input-panel">
+    <input type="file" id="input" multiple onchange="readFiles(this.files)"/>
+    <span id="status-panel">Status: <a id="status">waiting for input</a></span>
+</div>
+<div id="map-style-panel">
+    <button id="comms-button" onclick="toggleComms()">Hide COMMs</button>
+    <button id="no-comms-button" onclick="toggleNoComms()">Show Failed COMMs</button>
+    <button id="repeated-comms-button" onclick="toggleRepeatedComms()">Hide Repeated COMMs</button>
+</div>
+<div id="map"></div>
+</body>
+</html>
