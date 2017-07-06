@@ -26,6 +26,8 @@
     <div class="options-dropdown-content show" id="options-dropdown-content">
         <div class="column">
             <div><input type="text" name="custom" id="custom-hex-input" placeholder="Custom ex: &quot;0x1, 0x3&quot;"></div>
+            <div><input type="checkbox" name="hex-code" id="critical" value="critical" checked>
+                <label for="critical">Critical Errors (0x1-0x17)</label></div>
             <div><input type="checkbox" name="hex-code" id="0x10A" value="0x10A">
                 <label for="0x10A">0x10A: Board Temp</label></div>
             <div><input type="checkbox" name="hex-code" id="0x114" value="0x114">
@@ -40,54 +42,6 @@
                 <label for="0x100">0x100: EOT Transmit</label></div>
             <div><input type="checkbox" name="hex-code" id="0x120" value="0x120">
                 <label for="0x120">0x120: EOT Receive</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x1" value="0x1">
-                <label for="0x1">0x1: RTC Not Set</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x3" value="0x3">
-                <label for="0x3">0x3: Brake Solenoid Not Connected</label></div>
-        </div>
-        <div class="column">
-            <div><input type="checkbox" name="hex-code" id="0x04" value="0x10A">
-                <label for="0x04">0x04: Pressure Transducer Not Connected</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x05" value="0x114">
-                <label for="0x05">0x05: HVM Failure</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x06" value="0x115">
-                <label for="0x06">0x06: GPS Not Connected</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x07" value="0x11A">
-                <label for="0x07">0x07: LIS302 Accelerometer Not Present</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x08" value="0x11B">
-                <label for="0x08">0x08: Real Time Clock Not Functioning</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x09" value="0x100">
-                <label for="0x09">0x09: HDSP2502 Display Failure</label></div>
-            <div><input type="checkbox" name="hex-code" id="0xA" value="0x120">
-                <label for="0xA">0xA: LM47CIM Temp Sensor Not Present</label></div>
-            <div><input type="checkbox" name="hex-code" id="0xB" value="0x1">
-                <label for="0xB">0xB: Voltage 3.3 Out Of Tolerance</label></div>
-            <div><input type="checkbox" name="hex-code" id="0xC" value="0x3">
-                <label for="0xC">0xC: Voltage 5.5 Out Of Tolerance</label></div>
-            <div><input type="checkbox" name="hex-code" id="0xD" value="0x3">
-                <label for="0xD">0xD: Voltage 12.0 Out Of Tolerance</label></div>
-        </div>
-        <div class="column">
-            <div><input type="checkbox" name="hex-code" id="0xE" value="0x10A">
-                <label for="0xE">0xE: Brake Solenoid Failed During Blow</label></div>
-            <div><input type="checkbox" name="hex-code" id="0xF" value="0x114">
-                <label for="0xF">0xF: Turbine Not Spinning</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x10" value="0x115">
-                <label for="0x10">0x10: Turbine RPM Varying Too Much</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x11" value="0x11A">
-                <label for="0x11">0x11: Turbine RPM Out Of Spec VS Pressure</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x12" value="0x11B">
-                <label for="0x12">0x12: Turbine Out Of Spec VS RPM</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x13" value="0x100">
-                <label for="0x13">0x13: CMX469 Modem Not Present</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x14" value="0x120">
-                <label for="0x14">0x14: Charger Failure</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x15" value="0x1">
-                <label for="0x15">0x15: Radio Not Connected</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x16" value="0x3">
-                <label for="0x16">0x16: CPLD Not Present Or Programmed</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x17" value="0x3">
-                <label for="0x17">0x17: SD Card Corrupt</label></div>
         </div>
     </div>
     <div id="results-panel"></div>

@@ -27,13 +27,14 @@ function readFiles(files) {
             };
         reader.onload =
             function() {
+                console.log("parsed file " + index + "/" + files.length);
+                etd_list = parseETDFile(reader, etd_list);
                 if (index+1 < files.length) {
-                    etd_list = parseETDFile(reader, etd_list);
                     reader.readAsText(files[++index]);
                 } else {
                     document.getElementById("results-panel").innerHTML = "";
+                    console.log("parsed " + etd_list.length + " unique ETDs");
                     for(var i = 0; i < etd_list.length; i++) {
-                        etd_list[i].print();
                         addTable(etd_list[i]);
                     }
                     document.getElementById("status").innerHTML = "Done";
@@ -53,10 +54,10 @@ function addTable(etd) {
     etdDropdown.setAttribute("class", "etd-dropdown");
     var etdButton = document.createElement("button");
     etdButton.appendChild(document.createTextNode("ID: " + etd.id + ", V: " + etd.firmware + ", SN: " + etd.sn));
-    etdButton.setAttribute("onclick", ("toggleDropdown("+(etd.id+""+etd.firmware.replace('.', '')+""+etd.sn).slice(0,15)+")"));
+    etdButton.setAttribute("onclick", ("toggleDropdown(\""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn)+"\")"));
     etdButton.setAttribute("class", "etd-dropdown-trigger");
     var etdDropdownContent = document.createElement("div");
-    etdDropdownContent.setAttribute("id", (""+etd.id+""+etd.firmware.replace('.', '')+""+etd.sn).slice(0,15));
+    etdDropdownContent.setAttribute("id", (""+etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn));
     etdDropdownContent.setAttribute("class", "etd-dropdown-content");
     etdDropdown.appendChild(etdButton);
 
@@ -64,15 +65,17 @@ function addTable(etd) {
     for(var code_num = 0; code_num < etd.tracked_codes.length; code_num++) {
         var tracked_code = etd.tracked_codes[code_num];
 
+        if(tracked_code.logs.length === 0) continue;
+
         // Create a dropdown panel for the hex code
         var hexDropdown = document.createElement("div");
         hexDropdown.setAttribute("class", "hex-dropdown");
         var hexButton = document.createElement("button");
         hexButton.appendChild(document.createTextNode(tracked_code.code+": "+tracked_code.logs.length));
-        hexButton.setAttribute("onclick", ("toggleDropdown("+(etd.id+""+etd.firmware.replace('.', '')+""+etd.sn+""+code_num).slice(3,18)+")"));
+        hexButton.setAttribute("onclick", ("toggleDropdown(\""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num)+"\")"));
         hexButton.setAttribute("class", "hex-dropdown-trigger");
         var hexDropdownContent = document.createElement("div");
-        hexDropdownContent.setAttribute("id", (""+(etd.id+""+etd.firmware.replace('.', '')+""+etd.sn+""+code_num).slice(3,18)));
+        hexDropdownContent.setAttribute("id", (""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num)));
         hexDropdownContent.setAttribute("class", "hex-dropdown-content");
         hexDropdown.appendChild(hexButton);
 
@@ -197,55 +200,54 @@ function parseETDFile(reader, etd_list) {
     var line;
     var this_etd;
     for (var line_num = 0; line_num < lines.length-1; line_num++) {
-        if(!lines[line_num]) {
-            console.log("Can not read '" + lines[line_num] + "'.");
-            return;
-        } else {
+        try {
             line = lines[line_num];
-        }
 
-        // If a log header is found
-        if(line.charAt(0) === "-" && (line_num+7 < lines.length) && lines[line_num+1].charAt(0) === 'E') {
-            // Parse the header
-            var id = lines[++line_num];
-            var firmware = lines[++line_num];
-            var cpld = lines[++line_num];
-            var sn = lines[++line_num];
-            var customer = lines[++line_num];
-            var turbine_time = lines[++line_num];
-            var battery_time = lines[++line_num];
+            // If a log header is found
+            if (line.charAt(0) === "-" && (line_num + 7 < lines.length) && lines[line_num + 1].charAt(0) === 'E') {
+                // Parse the header
+                var id = lines[++line_num];
+                var firmware = lines[++line_num];
+                var cpld = lines[++line_num];
+                var sn = lines[++line_num];
+                var customer = lines[++line_num];
+                var turbine_time = lines[++line_num];
+                var battery_time = lines[++line_num];
 
-            // Create a new etd Object
-            var new_etd = createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_time);
-            // If the etd initialized successfully
-            if (new_etd) {
+                // Create a new etd Object
+                var new_etd = createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_time);
+                // If the etd initialized successfully
+                if (new_etd) {
 
-                // Scan existing ETDs for a match with the new ETD
-                var match_found = false;
-                for (var etd_num = 0; etd_num < etd_list.length; etd_num++) {
-                    var existing_etd = etd_list[etd_num];
+                    // Scan existing ETDs for a match with the new ETD
+                    var match_found = false;
+                    for (var etd_num = 0; etd_num < etd_list.length; etd_num++) {
+                        var existing_etd = etd_list[etd_num];
 
-                    // If a match is found, set the existing ETD at this_etd
-                    if (new_etd.id === existing_etd.id
-                        && new_etd.firmware === existing_etd.firmware
-                        && new_etd.sn === existing_etd.sn) {
-                        match_found = true;
-                        this_etd = existing_etd;
-                        existing_etd.turbine_time = new_etd.turbine_time;
-                        existing_etd.battery_time = new_etd.battery_time;
-                        break;
+                        // If a match is found, set the existing ETD at this_etd
+                        if (new_etd.id === existing_etd.id
+                            && new_etd.firmware === existing_etd.firmware
+                            && new_etd.sn === existing_etd.sn) {
+                            match_found = true;
+                            this_etd = existing_etd;
+                            existing_etd.turbine_time = new_etd.turbine_time;
+                            existing_etd.battery_time = new_etd.battery_time;
+                            break;
+                        }
+                    }
+
+                    // If an existing ETD could not be found, set the new ETD as this_etd
+                    if (match_found === false) {
+                        etd_list.push(new_etd);
+                        this_etd = new_etd;
+                        loadOptions(this_etd);
                     }
                 }
-
-                // If an existing ETD could not be found, set the new ETD as this_etd
-                if(match_found === false) {
-                    etd_list.push(new_etd);
-                    this_etd = new_etd;
-                    loadOptions(this_etd);
-                }
+            } else if (this_etd) {
+                this_etd.parse(line);
             }
-        } else if(this_etd){
-            this_etd.parse(line);
+        } catch (err) {
+            console.log("Can not read '" + lines[line_num] + "'.");
         }
     }
     return etd_list;
@@ -278,6 +280,30 @@ function loadOptions(etd) {
     }
     if(document.querySelector('input[value="0x120"]').checked) {
         etd.addCode("0x120");
+    }
+    if(document.querySelector('input[value="critical"]').checked) {
+        etd.addCode("0x1");
+        etd.addCode("0x3");
+        etd.addCode("0x4");
+        etd.addCode("0x5");
+        etd.addCode("0x6");
+        etd.addCode("0x7");
+        etd.addCode("0x8");
+        etd.addCode("0x9");
+        etd.addCode("0xA");
+        etd.addCode("0xB");
+        etd.addCode("0xC");
+        etd.addCode("0xD");
+        etd.addCode("0xE");
+        etd.addCode("0xF");
+        etd.addCode("0x10");
+        etd.addCode("0x11");
+        etd.addCode("0x12");
+        etd.addCode("0x13");
+        etd.addCode("0x14");
+        etd.addCode("0x15");
+        etd.addCode("0x16");
+        etd.addCode("0x17");
     }
 }
 
