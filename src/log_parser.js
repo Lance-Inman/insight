@@ -3,49 +3,51 @@ var etd_list = [];
 function readFiles(files) {
     var index = 0;
 
-    document.getElementById("status").innerHTML = "Loading files...";
-    document.getElementById("input-panel").style.backgroundColor = "#FFEB3B";
-    files = [].slice.call(files).sort(chronCompare);
-    document.getElementById("status").innerHTML = "Parsing files...";
-    document.getElementById("input-panel").style.backgroundColor = "#FFEB3B";
-
     var reader = new FileReader();
-        reader.onerror =
-            function() {
-                console.log("reading operation encountered an error");
-                document.getElementById("status").innerHTML = "Error reading file";
-                document.getElementById("input-panel").style.backgroundColor = "#F44336";
-            };
-        reader.onabort =
-            function() {
-                console.log("Reading operation aborted.");
-                document.getElementById("status").innerHTML = "Aborted reading file";
-                document.getElementById("input-panel").style.backgroundColor = "#F44336";
-            };
-        reader.onloadstart =
-            function() {
-            };
-        reader.onload =
-            function() {
-                console.log("parsed file " + index + "/" + files.length);
-                etd_list = parseETDFile(reader, etd_list);
-                if (index+1 < files.length) {
-                    reader.readAsText(files[++index]);
-                } else {
-                    document.getElementById("results-panel").innerHTML = "";
-                    console.log("parsed " + etd_list.length + " unique ETDs");
-                    for(var i = 0; i < etd_list.length; i++) {
-                        addTable(etd_list[i]);
-                    }
-                    document.getElementById("status").innerHTML = "Done";
-                    document.getElementById("input-panel").style.backgroundColor = "#4CAF50";
-                    toggleDropdown("options-dropdown-content");
+    reader.onerror =
+        function () {
+            console.log("reading operation encountered an error");
+            document.getElementById("status").innerHTML = "Error reading file";
+            document.getElementById("input-panel").style.backgroundColor = "#F44336";
+        };
+    reader.onabort =
+        function () {
+            console.log("Reading operation aborted.");
+            document.getElementById("status").innerHTML = "Aborted reading file";
+            document.getElementById("input-panel").style.backgroundColor = "#F44336";
+        };
+    reader.onloadstart =
+        function () {
+        };
+    reader.onload =
+        function () {
+            console.log("parsed file " + index + "/" + files.length);
+            etd_list = parseETDFile(reader, etd_list);
+            if (index + 1 < files.length) {
+                reader.readAsText(files[++index]);
+            } else {
+                document.getElementById("results-panel").innerHTML = "";
+                console.log("parsed " + etd_list.length + " unique ETDs");
+                for (var i = 0; i < etd_list.length; i++) {
+                    addTable(etd_list[i]);
                 }
-            };
-        reader.onloadend =
-            function() {
-            };
-    reader.readAsText(files[0]);
+                document.getElementById("status").innerHTML = "Done";
+                document.getElementById("input-panel").style.backgroundColor = "#4CAF50";
+                toggleDropdown("options-dropdown-content");
+            }
+        };
+    reader.onloadend =
+        function () {
+        };
+
+    if (files.length > 0) {
+        document.getElementById("status").innerHTML = "Loading files...";
+        document.getElementById("input-panel").style.backgroundColor = "#FFEB3B";
+        files = [].slice.call(files).sort(chronCompare);
+        document.getElementById("status").innerHTML = "Parsing files...";
+        document.getElementById("input-panel").style.backgroundColor = "#FFEB3B";
+        reader.readAsText(files[0]);
+    }
 }
 
 function addTable(etd) {
@@ -62,11 +64,13 @@ function addTable(etd) {
     etdDropdown.appendChild(etdButton);
 
     // For each hex code tracked by the etd
+    var isEmpty = true;
     for(var code_num = 0; code_num < etd.tracked_codes.length; code_num++) {
         var tracked_code = etd.tracked_codes[code_num];
 
         if(tracked_code.logs.length === 0) continue;
 
+        isEmpty = false;
         // Create a dropdown panel for the hex code
         var hexDropdown = document.createElement("div");
         hexDropdown.setAttribute("class", "hex-dropdown");
@@ -121,6 +125,13 @@ function addTable(etd) {
         etdDropdownContent.appendChild(hexDropdown);
     }
 
+    if(isEmpty) {
+        console.log("empty");
+        var empty = document.createElement("p");
+        empty.appendChild(document.createTextNode("No parsed codes found"));
+        etdDropdownContent.appendChild(empty);
+    }
+
     etdDropdown.appendChild(etdDropdownContent);
     var element = document.getElementById("results-panel");
     element.appendChild(etdDropdown);
@@ -141,10 +152,10 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
     var obj = {};
 
     try {
-        obj.id = id.match(/[0-9]{4}/)[0];
+        obj.id = id.match(/[0-9]{1,5}/)[0];
         obj.firmware = firmware.match(/[0-9]+.[0-9]+/)[0];
         obj.cpld = cpld.match(/[0-9]+.[0-9]+/)[0];
-        obj.sn = sn.match(/[0-9]+/)[0];
+        obj.sn = sn.match(/(?:Processor Board Serial Number: |\G)([A-Za-z0-9 ]+)/)[1];
         obj.customer = customer.match(/(?:Customer ID: |\G)([A-Z]+)/)[0];
         obj.turbine_time = turbine_time.match(/(?:Turbine Time: |\G)([0-9]+.[0-9]+)/)[0];
         obj.battery_time = battery_time.match(/(?:Battery Time: |\G)([0-9]+.[0-9]+)/)[0];
@@ -213,6 +224,7 @@ function parseETDFile(reader, etd_list) {
                 var customer = lines[++line_num];
                 var turbine_time = lines[++line_num];
                 var battery_time = lines[++line_num];
+                console.log(id + ", " + firmware + ", " + cpld + ", " + sn + ", " + customer + ", " + turbine_time + ", " + battery_time + ", ");
 
                 // Create a new etd Object
                 var new_etd = createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_time);
@@ -304,6 +316,8 @@ function loadOptions(etd) {
         etd.addCode("0x15");
         etd.addCode("0x16");
         etd.addCode("0x17");
+        etd.addCode("0x1D");
+        etd.addCode("0x12E");
     }
 }
 
