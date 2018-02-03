@@ -67,7 +67,7 @@ function addTable(etd) {
     var isEmpty = true;
     for(var code_num = 0; code_num < etd.tracked_codes.length; code_num++) {
         var tracked_code = etd.tracked_codes[code_num];
-
+        var typegraph = "";
         if(tracked_code.logs.length === 0) continue;
 
         isEmpty = false;
@@ -99,7 +99,9 @@ function addTable(etd) {
         header.appendChild(td3);
         header.appendChild(td4);
         table.appendChild(header);
-
+        const tempData = [];
+        const batteryData = [];
+        const turbVData = [];
         // For each log of the tracked code
         for(var log_num = 0; log_num < tracked_code.logs.length; log_num++) {
             // Create a table row
@@ -113,13 +115,107 @@ function addTable(etd) {
             td2.appendChild(document.createTextNode(values[1]));
             td3.appendChild(document.createTextNode(values[2]));
             td4.appendChild(document.createTextNode(values[3]));
+            //-----------------------Graphing------------------------------//
+            /*we start with the regex commands which need to be unique to each
+              set of data so that we don't have overlapping matching, hence the
+              Info, and V,
+              We then check for matches and cutout the unneeded text using the
+              substring method, while adding it to our data section
+              TODO: add date support rather than log numbers
+            */
+            var batteryRegex = /Info, [0-9.]+(?=V)/g;
+            var temperatureRegex = /[0-9.]+(?=F)/g;
+            var turbVRegex = /V, [0-9.]+(?=V)/g;
+            var matchTurbV = turbVRegex.exec(values[3]);
+            if(matchTurbV != null){
+                typegraph = "turbineVoltage";
+                console.log(matchTurbV[0].substring(3));
+                turbVData.push(([log_num,parseFloat(matchTurbV[0].substring(3))]))
+            }
+            var matchBattery = batteryRegex.exec(values[3]);
+            if(matchBattery != null){
+                typegraph = "battery";
+                batteryData.push([log_num,parseFloat(matchBattery[0].substring(6))]);
+            }
+            var matchTemp = temperatureRegex.exec(values[3]);
+            if(matchTemp != null){
+                typegraph = "temperature";
+                tempData.push([log_num,parseFloat(matchTemp[0])]);
+            }
             row.appendChild(td1);
             row.appendChild(td2);
             row.appendChild(td3);
             row.appendChild(td4);
             table.appendChild(row);
         }
-
+        //For each of the if and else if statements we make sure that the graph type (or regex that matched)
+        //is of the correct type to make the graph, we then make a div and set up its attributes
+        //Finally we add an event listener to create the graph when you click on the graphs table button
+        if(tempData[0] != null) {
+            if (typegraph === "temperature") {
+                var tempDiv = document.createElement("div");
+                hexDropdownContent.appendChild(tempDiv);
+                tempDiv.setAttribute("id", "graphdiv-temp");
+                tempDiv.style.width = "100%";
+                tempDiv.style.color = "black";
+                tempDiv.style.backgroundColor = "white";
+                hexButton.addEventListener("click", function () {
+                    const tGraph = new Dygraph(
+                        tempDiv,
+                        tempData, {
+                            legend: 'always',
+                            title: 'Temperature over Time',
+                            showRoller: true,
+                            ylabel: 'Degrees Fahrenheit',
+                            color: "red",
+                        }
+                    );
+                });
+            }
+        }
+        else if(turbVData[0] != null) {
+           if (typegraph === "turbineVoltage") {
+                var tvDiv = document.createElement("div");
+                hexDropdownContent.appendChild(tvDiv);
+                tvDiv.setAttribute("id", "graphdiv-turbineV");
+                tvDiv.style.width = "100%";
+                tvDiv.style.color = "black";
+                tvDiv.style.backgroundColor = "white";
+                hexButton.addEventListener("click", function () {
+                    const turbineVGraph = new Dygraph(
+                        tvDiv,
+                        turbVData, {
+                            legend: 'always',
+                            title: 'Turbine voltage over time',
+                            showRoller: true,
+                            ylabel: 'Voltage',
+                        }
+                    );
+                });
+           }
+        }
+        else if(batteryData[0] != null) {
+            if (typegraph === "battery") {
+                var batGraph = document.createElement("div");
+                batGraph.setAttribute("id", "graphdiv-battery");
+                batGraph.style.width = "100%";
+                batGraph.style.color = "black";
+                batGraph.style.backgroundColor = "white";
+                hexDropdownContent.appendChild(batGraph);
+                hexButton.addEventListener("click", function () {
+                    const bGraph = new Dygraph(
+                        batGraph,
+                        batteryData, {
+                            legend: 'always',
+                            title: 'Battery Voltage over Time',
+                            showRoller: true,
+                            ylabel: 'Battery Voltage',
+                            color: "green",
+                        }
+                    );
+                });
+            }
+        }
         hexDropdownContent.appendChild(table);
         hexDropdown.appendChild(hexDropdownContent);
         etdDropdownContent.appendChild(hexDropdown);

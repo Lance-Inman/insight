@@ -6,8 +6,9 @@
     <title>DPS Insight V0.0.3</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="style.css">
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="log_parser.js"></script>
+    <link rel="stylesheet" type="text/css" href="dygraphs/dist/dygraph.min.css">
+    <script type="text/javascript" src="dygraphs/dist/dygraph.min.js"></script>
+
 </head>
 <body>
     <div id="input-panel">
@@ -46,5 +47,7 @@
                 <label for="0x120">0x120: EOT Receive</label></div>
         </div>
     </div>
+    <div id="graphdiv" style="background-color: white;width:100%;"></div>
     <div id="results-panel"></div>
+    <script src="log_parser.js"></script>
 </body>
