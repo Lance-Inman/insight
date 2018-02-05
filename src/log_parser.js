@@ -8,13 +8,13 @@ function readFiles(files) {
         function () {
             console.log("reading operation encountered an error");
             document.getElementById("status").innerHTML = "Error reading file";
-            document.getElementById("input-panel").style.backgroundColor = "#F44336";
+            document.getElementById("grid-input-panel").style.backgroundColor = "#F44336";
         };
     reader.onabort =
         function () {
             console.log("Reading operation aborted.");
             document.getElementById("status").innerHTML = "Aborted reading file";
-            document.getElementById("input-panel").style.backgroundColor = "#F44336";
+            document.getElementById("grid-input-panel").style.backgroundColor = "#F44336";
         };
     reader.onloadstart =
         function () {
@@ -32,7 +32,7 @@ function readFiles(files) {
                     addTable(etd_list[i]);
                 }
                 document.getElementById("status").innerHTML = "Done";
-                document.getElementById("input-panel").style.backgroundColor = "#4CAF50";
+                document.getElementById("grid-input-panel").style.backgroundColor = "#4CAF50";
                 toggleDropdown("options-dropdown-content");
             }
         };
@@ -42,7 +42,7 @@ function readFiles(files) {
 
     if (files.length > 0) {
         document.getElementById("status").innerHTML = "Loading files...";
-        document.getElementById("input-panel").style.backgroundColor = "#FFEB3B";
+        document.getElementById("grid-input-panel").style.backgroundColor = "#FFEB3B";
         files = [].slice.call(files).sort(chronCompare);
         document.getElementById("status").innerHTML = "Parsing files...";
         document.getElementById("input-panel").style.backgroundColor = "#FFEB3B";
@@ -123,6 +123,22 @@ function addTable(etd) {
               substring method, while adding it to our data section
               TODO: add date support rather than log numbers
             */
+            //Date Formatting
+            let yearRegex = /[0-9]{4}/;
+            let monthRegex = /[a-zA-Z]+/;
+            let dayRegex = /^[0-9]{1,2}/;
+            let timeRegex = /[0-9]{2}:[0-9]{2}:[0-9]{2}/;
+            let yearRegexMatch = yearRegex.exec(values[0]);
+            let monthRegexmatch = monthRegex.exec(values[0]);
+            let dayRegexmatch = dayRegex.exec(values[0]);
+            let timeRegexmatch = timeRegex.exec(values[0]);
+            let month = changeMonthtoNumber(monthRegexmatch[0]);
+            let date = new Date();
+            date.setFullYear(parseInt(yearRegexMatch[0]), month, parseInt(dayRegexmatch[0]));
+            date.setHours(parseInt(timeRegexmatch[0].substring(0,1)),parseInt(timeRegexmatch[0].substring(3,4)), parseInt(timeRegexmatch[0].substring(6,7)));
+            let totalDate = yearRegexMatch[0]+"/"+month+"/"+dayRegexmatch[0] +" " + timeRegexmatch[0];
+            console.log(date.getFullYear());
+            //Data Grabbing
             var batteryRegex = /Info, [0-9.]+(?=V)/g;
             var temperatureRegex = /[0-9.]+(?=F)/g;
             var turbVRegex = /V, [0-9.]+(?=V)/g;
@@ -130,18 +146,19 @@ function addTable(etd) {
             if(matchTurbV != null){
                 typegraph = "turbineVoltage";
                 console.log(matchTurbV[0].substring(3));
-                turbVData.push(([log_num,parseFloat(matchTurbV[0].substring(3))]))
+                turbVData.push(([date,parseFloat(matchTurbV[0].substring(3))]))
             }
             var matchBattery = batteryRegex.exec(values[3]);
             if(matchBattery != null){
                 typegraph = "battery";
-                batteryData.push([log_num,parseFloat(matchBattery[0].substring(6))]);
+                batteryData.push([date,parseFloat(matchBattery[0].substring(6))]);
             }
             var matchTemp = temperatureRegex.exec(values[3]);
             if(matchTemp != null){
                 typegraph = "temperature";
-                tempData.push([log_num,parseFloat(matchTemp[0])]);
+                tempData.push([date,parseFloat(matchTemp[0])]);
             }
+
             row.appendChild(td1);
             row.appendChild(td2);
             row.appendChild(td3);
@@ -159,17 +176,18 @@ function addTable(etd) {
                 tempDiv.style.width = "100%";
                 tempDiv.style.color = "black";
                 tempDiv.style.backgroundColor = "white";
+                const tGraph = new Dygraph(
+                    tempDiv,
+                    tempData, {
+                        legend: 'always',
+                        title: 'Temperature over Time',
+                        showRoller: true,
+                        ylabel: 'Degrees Fahrenheit',
+                        color: "red",
+                    }
+                );
                 hexButton.addEventListener("click", function () {
-                    const tGraph = new Dygraph(
-                        tempDiv,
-                        tempData, {
-                            legend: 'always',
-                            title: 'Temperature over Time',
-                            showRoller: true,
-                            ylabel: 'Degrees Fahrenheit',
-                            color: "red",
-                        }
-                    );
+                    tGraph.resize();
                 });
             }
         }
@@ -181,16 +199,17 @@ function addTable(etd) {
                 tvDiv.style.width = "100%";
                 tvDiv.style.color = "black";
                 tvDiv.style.backgroundColor = "white";
+               const turbineVGraph = new Dygraph(
+                   tvDiv,
+                   turbVData, {
+                       legend: 'always',
+                       title: 'Turbine voltage over time',
+                       showRoller: true,
+                       ylabel: 'Voltage',
+                   }
+               );
                 hexButton.addEventListener("click", function () {
-                    const turbineVGraph = new Dygraph(
-                        tvDiv,
-                        turbVData, {
-                            legend: 'always',
-                            title: 'Turbine voltage over time',
-                            showRoller: true,
-                            ylabel: 'Voltage',
-                        }
-                    );
+                    turbineVGraph.resize();
                 });
            }
         }
@@ -202,17 +221,18 @@ function addTable(etd) {
                 batGraph.style.color = "black";
                 batGraph.style.backgroundColor = "white";
                 hexDropdownContent.appendChild(batGraph);
+                const bGraph = new Dygraph(
+                    batGraph,
+                    batteryData, {
+                        legend: 'always',
+                        title: 'Battery Voltage over Time',
+                        showRoller: true,
+                        ylabel: 'Battery Voltage',
+                        color: "green",
+                    }
+                );
                 hexButton.addEventListener("click", function () {
-                    const bGraph = new Dygraph(
-                        batGraph,
-                        batteryData, {
-                            legend: 'always',
-                            title: 'Battery Voltage over Time',
-                            showRoller: true,
-                            ylabel: 'Battery Voltage',
-                            color: "green",
-                        }
-                    );
+                    bGraph.resize();
                 });
             }
         }
@@ -232,7 +252,46 @@ function addTable(etd) {
     var element = document.getElementById("results-panel");
     element.appendChild(etdDropdown);
 }
-
+function changeMonthtoNumber(month){
+    let value = null;
+    if(month === "January"){
+        value = 1;
+    }
+    else if(month === "February"){
+        value = 2;
+    }
+    else if(month === "March"){
+        value = 3;
+    }
+    else if(month === "April"){
+        value = 4;
+    }
+    else if(month === "May"){
+        value = 5;
+    }
+    else if(month === "June"){
+        value = 6;
+    }
+    else if(month === "July"){
+        value = 7;
+    }
+    else if(month === "August"){
+        value = 8;
+    }
+    else if(month === "September"){
+        value = 9;
+    }
+    else if(month === "October"){
+        value = 10;
+    }
+    else if(month === "November"){
+        value = 11;
+    }
+    else if(month === "December"){
+        value = 12;
+    }
+    return value;
+}
 function toggleDropdown(elementId) {
     document.getElementById(elementId).classList.toggle("show");
 }

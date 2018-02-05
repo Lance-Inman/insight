@@ -12,18 +12,20 @@
 </head>
 <body>
     <div id="input-panel">
-        <div id="file-panel">
-            <div id="folder">
-                <input type="file" id="folder-input" directory webkitdirectory onchange="readFiles(this.files)" style="display: none;"/>
-                <label for="folder-input">Input Folder</label>
+        <div id="grid-input-panel">
+            <div id="file-panel">
+                <div id="folder">
+                    <input type="file" id="folder-input" directory webkitdirectory onchange="readFiles(this.files)" style="display: none;"/>
+                    <label for="folder-input">Input Folder</label>
+                </div>
+                <div id="file"><input type="file" id="file-input" multiple onchange="readFiles(this.files)" style="display: none;" />
+                    <label for="file-input">Input Files</label>
+                </div>
             </div>
-            <div id="file"><input type="file" id="file-input" multiple onchange="readFiles(this.files)" style="display: none;" />
-                <label for="file-input">Input Files</label>
+            <span id="status-panel">Status: <a id="status">waiting for input</a></span>
+            <div class="options-dropdown">
+                <button class="options-dropdown-trigger" onclick="toggleDropdown(&quot;options-dropdown-content&quot;)">Options</button>
             </div>
-        </div>
-        <span id="status-panel">Status: <a id="status">waiting for input</a></span>
-        <div class="options-dropdown">
-            <button class="options-dropdown-trigger" onclick="toggleDropdown(&quot;options-dropdown-content&quot;)">Options</button>
         </div>
     </div>
     <div class="options-dropdown-content show" id="options-dropdown-content">

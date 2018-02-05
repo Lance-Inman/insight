@@ -11,9 +11,12 @@ button {
     border: 1px solid darkgrey;
     border-radius: 3px;
     color: white;
-    padding: 1px,5px,1px,5px
 }
-
+#grid-input-panel {
+    display: grid;
+    grid-template-columns: 25% 50% 25%;
+    background-color: #424242;
+}
 #input-panel {
     min-width: 600px;
     position: relative;
@@ -21,10 +24,10 @@ button {
     background-color: #424242;
     height: auto;
 }
+
 #file-panel {
-    display: inline-block;
-    width: 32%;
-    height: 100%;
+    position:absolute;
+    grid-column: span;
 }
 
 #file-panel label {
@@ -39,37 +42,48 @@ button {
 }
 
 #folder {
+    display: inline-block;
+    width: auto;
+    grid-column: 1;
+    grid-row: 1;
     padding-left: 5px;
     padding-right: 5px;
-    display: inline-block;
-    height: 100%;
 }
 #folder label {
-    height: 100%;
     margin-right: -7px;
+    display:inline-block;
+    width: auto;
+    grid-column: 1;
+    grid-row: 1;
 }
 
 #file {
     padding: 5px;
     display: inline-block;
+    width: auto;
 }
 #file label {
+    display: inline-block;
+    width: auto;
+    grid-column: 1;
+    grid-row: 1;
     height: 100%;
 }
 
 #status-panel {
-    display: inline-block;
-    width: 34%;
-    height: 100%;
+    grid-column: 2;
+    grid-row: 1;
+    padding-top: 10px;
     text-align: center;
     line-height: 100%;
-    padding-top: 3px;
 }
 
 .options-dropdown {
-    float: right;
-    padding: 5px;
-    width: 32%;
+    display: inline-block;
+    float:right;
+    grid-row:1;
+    grid-column:3;
+    padding: 10px 5px 5px 10px;
     height: 100%;
     position: inherit;
 }
