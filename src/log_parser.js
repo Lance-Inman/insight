@@ -121,7 +121,7 @@ function addTable(etd) {
               Info, and V,
               We then check for matches and cutout the unneeded text using the
               substring method, while adding it to our data section
-              TODO: add date support rather than log numbers
+              TODO: try to fix dygraph artifacting
             */
             //Date Formatting
             let yearRegex = /[0-9]{4}/;
@@ -136,8 +136,6 @@ function addTable(etd) {
             let date = new Date();
             date.setFullYear(parseInt(yearRegexMatch[0]), month, parseInt(dayRegexmatch[0]));
             date.setHours(parseInt(timeRegexmatch[0].substring(0,1)),parseInt(timeRegexmatch[0].substring(3,4)), parseInt(timeRegexmatch[0].substring(6,7)));
-            let totalDate = yearRegexMatch[0]+"/"+month+"/"+dayRegexmatch[0] +" " + timeRegexmatch[0];
-            console.log(date.getFullYear());
             //Data Grabbing
             var batteryRegex = /Info, [0-9.]+(?=V)/g;
             var temperatureRegex = /[0-9.]+(?=F)/g;
