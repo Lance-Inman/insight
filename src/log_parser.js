@@ -124,18 +124,18 @@ function addTable(etd) {
               TODO: try to fix dygraph artifacting
             */
             //Date Formatting
-            let yearRegex = /[0-9]{4}/;
-            let monthRegex = /[a-zA-Z]+/;
-            let dayRegex = /^[0-9]{1,2}/;
-            let timeRegex = /[0-9]{2}:[0-9]{2}:[0-9]{2}/;
+            let yearRegex = /[0-9]{4}/g;
+            let monthRegex = /[a-zA-Z]+/g;
+            let dayRegex = /^[0-9]{1,2}/g;
+            let timeRegex = /[0-9]{2}:[0-9]{2}:[0-9]{2}/g;
             let yearRegexMatch = yearRegex.exec(values[0]);
             let monthRegexmatch = monthRegex.exec(values[0]);
             let dayRegexmatch = dayRegex.exec(values[0]);
             let timeRegexmatch = timeRegex.exec(values[0]);
             let month = changeMonthtoNumber(monthRegexmatch[0]);
-            let date = new Date();
-            date.setFullYear(parseInt(yearRegexMatch[0]), month, parseInt(dayRegexmatch[0]));
-            date.setHours(parseInt(timeRegexmatch[0].substring(0,1)),parseInt(timeRegexmatch[0].substring(3,4)), parseInt(timeRegexmatch[0].substring(6,7)));
+            let date = new Date(yearRegexMatch[0]+"/"+ month + "/" + dayRegexmatch[0] + " " + timeRegexmatch);
+            //date.setFullYear(parseInt(yearRegexMatch[0]), month, parseInt(dayRegexmatch[0]));
+            //date.setHours(parseInt(timeRegexmatch[0].substring(0,1)),parseInt(timeRegexmatch[0].substring(3,4)), parseInt(timeRegexmatch[0].substring(6,7)));
             //Data Grabbing
             var batteryRegex = /Info, [0-9.]+(?=V)/g;
             var temperatureRegex = /[0-9.]+(?=F)/g;
@@ -182,6 +182,8 @@ function addTable(etd) {
                         showRoller: true,
                         ylabel: 'Degrees Fahrenheit',
                         color: "red",
+                        strokeWidth: .7,
+                        drawPoints: true,
                     }
                 );
                 hexButton.addEventListener("click", function () {
@@ -203,6 +205,8 @@ function addTable(etd) {
                        legend: 'always',
                        title: 'Turbine voltage over time',
                        showRoller: true,
+                       strokeWidth: .7,
+                       drawPoints: true,
                        ylabel: 'Voltage',
                    }
                );
@@ -226,7 +230,9 @@ function addTable(etd) {
                         title: 'Battery Voltage over Time',
                         showRoller: true,
                         ylabel: 'Battery Voltage',
+                        strokeWidth: .7,
                         color: "green",
+                        drawPoints: true,
                     }
                 );
                 hexButton.addEventListener("click", function () {
@@ -253,40 +259,40 @@ function addTable(etd) {
 function changeMonthtoNumber(month){
     let value = null;
     if(month === "January"){
-        value = 1;
+        value = "01";
     }
     else if(month === "February"){
-        value = 2;
+        value = "02";
     }
     else if(month === "March"){
-        value = 3;
+        value = "03";
     }
     else if(month === "April"){
-        value = 4;
+        value = "04";
     }
     else if(month === "May"){
-        value = 5;
+        value = "05";
     }
     else if(month === "June"){
-        value = 6;
+        value = "06";
     }
     else if(month === "July"){
-        value = 7;
+        value = "07";
     }
     else if(month === "August"){
-        value = 8;
+        value = "08";
     }
     else if(month === "September"){
-        value = 9;
+        value = "09";
     }
     else if(month === "October"){
-        value = 10;
+        value = "10";
     }
     else if(month === "November"){
-        value = 11;
+        value = "11";
     }
     else if(month === "December"){
-        value = 12;
+        value = "12";
     }
     return value;
 }
