@@ -49,7 +49,7 @@ function readFiles(files) {
         reader.readAsText(files[0]);
     }
 }
-
+let alldata = [];
 function addTable(etd) {
     // Create a dropdown panel for the etd
     var etdDropdown = document.createElement("div");
@@ -62,7 +62,12 @@ function addTable(etd) {
     etdDropdownContent.setAttribute("id", (""+etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn));
     etdDropdownContent.setAttribute("class", "etd-dropdown-content");
     etdDropdown.appendChild(etdButton);
-
+    //Graphing assigning variables
+    const tempData = [];
+    const batteryData = [];
+    const turbVData = [];
+    const pressureData = [];
+    const rpmData = [];
     // For each hex code tracked by the etd
     var isEmpty = true;
     for(var code_num = 0; code_num < etd.tracked_codes.length; code_num++) {
@@ -99,9 +104,7 @@ function addTable(etd) {
         header.appendChild(td3);
         header.appendChild(td4);
         table.appendChild(header);
-        const tempData = [];
-        const batteryData = [];
-        const turbVData = [];
+
         // For each log of the tracked code
         for(var log_num = 0; log_num < tracked_code.logs.length; log_num++) {
             // Create a table row
@@ -121,7 +124,6 @@ function addTable(etd) {
               Info, and V,
               We then check for matches and cutout the unneeded text using the
               substring method, while adding it to our data section
-              TODO: try to fix dygraph artifacting
             */
             //Date Formatting
             let yearRegex = /[0-9]{4}/g;
@@ -137,26 +139,36 @@ function addTable(etd) {
             //date.setFullYear(parseInt(yearRegexMatch[0]), month, parseInt(dayRegexmatch[0]));
             //date.setHours(parseInt(timeRegexmatch[0].substring(0,1)),parseInt(timeRegexmatch[0].substring(3,4)), parseInt(timeRegexmatch[0].substring(6,7)));
             //Data Grabbing
-            var batteryRegex = /Info, [0-9.]+(?=V)/g;
-            var temperatureRegex = /[0-9.]+(?=F)/g;
-            var turbVRegex = /V, [0-9.]+(?=V)/g;
-            var matchTurbV = turbVRegex.exec(values[3]);
+            let batteryRegex = /Info, [0-9.]+(?=V)/g;
+            let temperatureRegex = /[0-9.]+(?=F)/g;
+            let turbVRegex = /V, [0-9.]+(?=V)/g;
+            let pressureRegex = /[0-9.]+(?=PSI)/g;
+            let rpmRegex = /[0-9.]+(?=RPM)/g;
+            let matchTurbV = turbVRegex.exec(values[3]);
             if(matchTurbV != null){
                 typegraph = "turbineVoltage";
-                console.log(matchTurbV[0].substring(3));
                 turbVData.push(([date,parseFloat(matchTurbV[0].substring(3))]))
             }
-            var matchBattery = batteryRegex.exec(values[3]);
+            let matchBattery = batteryRegex.exec(values[3]);
             if(matchBattery != null){
                 typegraph = "battery";
                 batteryData.push([date,parseFloat(matchBattery[0].substring(6))]);
             }
-            var matchTemp = temperatureRegex.exec(values[3]);
+            let matchTemp = temperatureRegex.exec(values[3]);
             if(matchTemp != null){
                 typegraph = "temperature";
                 tempData.push([date,parseFloat(matchTemp[0])]);
             }
-
+            let matchPressure = pressureRegex.exec(values[3]);
+            if(matchPressure != null){
+                typegraph = "pressure";
+                pressureData.push([date,parseFloat(matchPressure[0])]);
+            }
+            let matchRPM = rpmRegex.exec(values[3]);
+            if(matchRPM != null){
+                typegraph = "rpm";
+                rpmData.push([date,parseFloat(matchRPM[0])]);
+            }
             row.appendChild(td1);
             row.appendChild(td2);
             row.appendChild(td3);
@@ -168,76 +180,27 @@ function addTable(etd) {
         //Finally we add an event listener to create the graph when you click on the graphs table button
         if(tempData[0] != null) {
             if (typegraph === "temperature") {
-                var tempDiv = document.createElement("div");
-                hexDropdownContent.appendChild(tempDiv);
-                tempDiv.setAttribute("id", "graphdiv-temp");
-                tempDiv.style.width = "100%";
-                tempDiv.style.color = "black";
-                tempDiv.style.backgroundColor = "white";
-                const tGraph = new Dygraph(
-                    tempDiv,
-                    tempData, {
-                        legend: 'always',
-                        title: 'Temperature over Time',
-                        showRoller: true,
-                        ylabel: 'Degrees Fahrenheit',
-                        color: "red",
-                        strokeWidth: .7,
-                        drawPoints: true,
-                    }
-                );
-                hexButton.addEventListener("click", function () {
-                    tGraph.resize();
-                });
+                makegraph(tempData,"Temperature over Time","red","Degrees Fahrenheit",hexDropdownContent,hexButton);
             }
         }
-        else if(turbVData[0] != null) {
+        if(turbVData[0] != null) {
            if (typegraph === "turbineVoltage") {
-                var tvDiv = document.createElement("div");
-                hexDropdownContent.appendChild(tvDiv);
-                tvDiv.setAttribute("id", "graphdiv-turbineV");
-                tvDiv.style.width = "100%";
-                tvDiv.style.color = "black";
-                tvDiv.style.backgroundColor = "white";
-               const turbineVGraph = new Dygraph(
-                   tvDiv,
-                   turbVData, {
-                       legend: 'always',
-                       title: 'Turbine voltage over time',
-                       showRoller: true,
-                       strokeWidth: .7,
-                       drawPoints: true,
-                       ylabel: 'Voltage',
-                   }
-               );
-                hexButton.addEventListener("click", function () {
-                    turbineVGraph.resize();
-                });
+               makegraph(turbVData,"Turbine voltage over time","blue","Voltage",hexDropdownContent,hexButton);
            }
         }
-        else if(batteryData[0] != null) {
+        if(batteryData[0] != null) {
             if (typegraph === "battery") {
-                var batGraph = document.createElement("div");
-                batGraph.setAttribute("id", "graphdiv-battery");
-                batGraph.style.width = "100%";
-                batGraph.style.color = "black";
-                batGraph.style.backgroundColor = "white";
-                hexDropdownContent.appendChild(batGraph);
-                const bGraph = new Dygraph(
-                    batGraph,
-                    batteryData, {
-                        legend: 'always',
-                        title: 'Battery Voltage over Time',
-                        showRoller: true,
-                        ylabel: 'Battery Voltage',
-                        strokeWidth: .7,
-                        color: "green",
-                        drawPoints: true,
-                    }
-                );
-                hexButton.addEventListener("click", function () {
-                    bGraph.resize();
-                });
+                makegraph(batteryData,"Battery Voltage over Time","green","Battery Voltage",hexDropdownContent,hexButton);
+            }
+        }
+        if(pressureData[0] != null) {
+            if (typegraph === "pressure") {
+                makegraph(pressureData,"Pressure over Time","grey","PSI",hexDropdownContent,hexButton);
+            }
+        }
+        if(rpmData[0] != null){
+            if(typegraph === "rpm"){
+                makegraph(rpmData,"Rotations per minute","orange","RPM",hexDropdownContent,hexButton);
             }
         }
         hexDropdownContent.appendChild(table);
@@ -255,6 +218,29 @@ function addTable(etd) {
     etdDropdown.appendChild(etdDropdownContent);
     var element = document.getElementById("results-panel");
     element.appendChild(etdDropdown);
+}
+function makegraph(data,name,color,yaxisLabel,parent,dropdown) {
+    let newgraph = document.createElement("div");
+    newgraph.setAttribute("id", "graphdiv-" + name);
+    newgraph.style.width = "100%";
+    newgraph.style.color = "black";
+    newgraph.style.backgroundColor = "white";
+    parent.appendChild(newgraph);
+    const nGraph = new Dygraph(
+        newgraph,
+        data, {
+            legend: 'always',
+            title: name,
+            showRoller: true,
+            ylabel: yaxisLabel,
+            strokeWidth: .7,
+            color: color,
+            drawPoints: true,
+        }
+    );
+    dropdown.addEventListener("click", function () {
+        nGraph.resize();
+    });
 }
 function changeMonthtoNumber(month){
     let value = null;
