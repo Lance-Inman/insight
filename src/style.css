@@ -88,12 +88,23 @@ button {
     position: inherit;
 }
 
+.help-button {
+    background-color: grey;
+    border: 1px solid darkgrey;
+    border-radius: 3px;
+    color: white;
+    font-size: medium;
+    position: relative;
+    bottom: 3px;
+    float: right;
+    margin-left:10px;
+}
+
 .options-dropdown-trigger {
     cursor: pointer;
     float: right;
-    display: inline-block;
+    bottom: 3px;
     position:relative;
-    bottom:3px;
 }
 
 .options-dropdown-content {
