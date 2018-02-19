@@ -8,13 +8,13 @@ function readFiles(files) {
         function () {
             console.log("reading operation encountered an error");
             document.getElementById("status").innerHTML = "Error reading file";
-            document.getElementById("input-panel").style.backgroundColor = "#F44336";
+            document.getElementById("grid-input-panel").style.backgroundColor = "#F44336";
         };
     reader.onabort =
         function () {
             console.log("Reading operation aborted.");
             document.getElementById("status").innerHTML = "Aborted reading file";
-            document.getElementById("input-panel").style.backgroundColor = "#F44336";
+            document.getElementById("grid-input-panel").style.backgroundColor = "#F44336";
         };
     reader.onloadstart =
         function () {
@@ -32,7 +32,7 @@ function readFiles(files) {
                     addTable(etd_list[i]);
                 }
                 document.getElementById("status").innerHTML = "Done";
-                document.getElementById("input-panel").style.backgroundColor = "#4CAF50";
+                document.getElementById("grid-input-panel").style.backgroundColor = "#4CAF50";
                 toggleDropdown("options-dropdown-content");
             }
         };
@@ -42,14 +42,14 @@ function readFiles(files) {
 
     if (files.length > 0) {
         document.getElementById("status").innerHTML = "Loading files...";
-        document.getElementById("input-panel").style.backgroundColor = "#FFEB3B";
+        document.getElementById("grid-input-panel").style.backgroundColor = "#FFEB3B";
         files = [].slice.call(files).sort(chronCompare);
         document.getElementById("status").innerHTML = "Parsing files...";
         document.getElementById("input-panel").style.backgroundColor = "#FFEB3B";
         reader.readAsText(files[0]);
     }
 }
-
+//var alldata = [];
 function addTable(etd) {
     // Create a dropdown panel for the etd
     var etdDropdown = document.createElement("div");
@@ -62,12 +62,17 @@ function addTable(etd) {
     etdDropdownContent.setAttribute("id", (""+etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn));
     etdDropdownContent.setAttribute("class", "etd-dropdown-content");
     etdDropdown.appendChild(etdButton);
-
+    //Graphing assigning variables
+    const tempData = [];
+    const batteryData = [];
+    const turbVData = [];
+    const pressureData = [];
+    const rpmData = [];
     // For each hex code tracked by the etd
     var isEmpty = true;
     for(var code_num = 0; code_num < etd.tracked_codes.length; code_num++) {
         var tracked_code = etd.tracked_codes[code_num];
-
+        var typegraph = "";
         if(tracked_code.logs.length === 0) continue;
 
         isEmpty = false;
@@ -113,13 +118,91 @@ function addTable(etd) {
             td2.appendChild(document.createTextNode(values[1]));
             td3.appendChild(document.createTextNode(values[2]));
             td4.appendChild(document.createTextNode(values[3]));
+            //-----------------------Graphing------------------------------//
+            /*we start with the regex commands which need to be unique to each
+              set of data so that we don't have overlapping matching, hence the
+              Info, and V,
+              We then check for matches and cutout the unneeded text using the
+              substring method, while adding it to our data section
+            */
+            //Date Formatting
+            var yearRegex = /[0-9]{4}/g;
+            var monthRegex = /[a-zA-Z]+/g;
+            var dayRegex = /^[0-9]{1,2}/g;
+            var timeRegex = /[0-9]{2}:[0-9]{2}:[0-9]{2}/g;
+            var yearRegexMatch = yearRegex.exec(values[0]);
+            var monthRegexmatch = monthRegex.exec(values[0]);
+            var dayRegexmatch = dayRegex.exec(values[0]);
+            var timeRegexmatch = timeRegex.exec(values[0]);
+            var month = changeMonthtoNumber(monthRegexmatch[0]);
+            var date = new Date(yearRegexMatch[0]+"/"+ month + "/" + dayRegexmatch[0] + " " + timeRegexmatch);
+            //date.setFullYear(parseInt(yearRegexMatch[0]), month, parseInt(dayRegexmatch[0]));
+            //date.setHours(parseInt(timeRegexmatch[0].substring(0,1)),parseInt(timeRegexmatch[0].substring(3,4)), parseInt(timeRegexmatch[0].substring(6,7)));
+            //Data Grabbing
+            var batteryRegex = /Info, [0-9.]+(?=V)/g;
+            var temperatureRegex = /[0-9.]+(?=F)/g;
+            var turbVRegex = /V, [0-9.]+(?=V)/g;
+            var pressureRegex = /[0-9.]+(?=PSI)/g;
+            var rpmRegex = /[0-9.]+(?=RPM)/g;
+            var matchTurbV = turbVRegex.exec(values[3]);
+            if(matchTurbV !== null){
+                typegraph = "turbineVoltage";
+                turbVData.push(([date,parseFloat(matchTurbV[0].substring(3))]))
+            }
+            var matchBattery = batteryRegex.exec(values[3]);
+            if(matchBattery !== null){
+                typegraph = "battery";
+                batteryData.push([date,parseFloat(matchBattery[0].substring(6))]);
+            }
+            var matchTemp = temperatureRegex.exec(values[3]);
+            if(matchTemp !== null){
+                typegraph = "temperature";
+                tempData.push([date,parseFloat(matchTemp[0])]);
+            }
+            var matchPressure = pressureRegex.exec(values[3]);
+            if(matchPressure !== null){
+                typegraph = "pressure";
+                pressureData.push([date,parseFloat(matchPressure[0])]);
+            }
+            var matchRPM = rpmRegex.exec(values[3]);
+            if(matchRPM !== null){
+                typegraph = "rpm";
+                rpmData.push([date,parseFloat(matchRPM[0])]);
+            }
             row.appendChild(td1);
             row.appendChild(td2);
             row.appendChild(td3);
             row.appendChild(td4);
             table.appendChild(row);
         }
-
+        //For each of the if and else if statements we make sure that the graph type (or regex that matched)
+        //is of the correct type to make the graph, we then make a div and set up its attributes
+        //Finally we add an event listener to create the graph when you click on the graphs table button
+        if(tempData[0] !== null) {
+            if (typegraph === "temperature") {
+                makegraph(tempData,"Temperature over Time","red","Degrees Fahrenheit",hexDropdownContent,hexButton);
+            }
+        }
+        if(turbVData[0] !== null) {
+           if (typegraph === "turbineVoltage") {
+               makegraph(turbVData,"Turbine voltage over time","blue","Voltage",hexDropdownContent,hexButton);
+           }
+        }
+        if(batteryData[0] !== null) {
+            if (typegraph === "battery") {
+                makegraph(batteryData,"Battery Voltage over Time","green","Battery Voltage",hexDropdownContent,hexButton);
+            }
+        }
+        if(pressureData[0] !== null) {
+            if (typegraph === "pressure") {
+                makegraph(pressureData,"Pressure over Time","grey","PSI",hexDropdownContent,hexButton);
+            }
+        }
+        if(rpmData[0] !== null){
+            if(typegraph === "rpm"){
+                makegraph(rpmData,"Rotations per minute","orange","RPM",hexDropdownContent,hexButton);
+            }
+        }
         hexDropdownContent.appendChild(table);
         hexDropdown.appendChild(hexDropdownContent);
         etdDropdownContent.appendChild(hexDropdown);
@@ -136,7 +219,69 @@ function addTable(etd) {
     var element = document.getElementById("results-panel");
     element.appendChild(etdDropdown);
 }
-
+function makegraph(data,name,color,yaxisLabel,parent,dropdown) {
+    var newgraph = document.createElement("div");
+    newgraph.setAttribute("id", "graphdiv-" + name);
+    newgraph.style.width = "100%";
+    newgraph.style.color = "black";
+    newgraph.style.backgroundColor = "white";
+    parent.appendChild(newgraph);
+    const nGraph = new Dygraph(
+        newgraph,
+        data, {
+            legend: 'always',
+            title: name,
+            showRoller: true,
+            ylabel: yaxisLabel,
+            strokeWidth: .7,
+            color: color,
+            drawPoints: true
+        }
+    );
+    dropdown.addEventListener("click", function () {
+        nGraph.resize();
+    });
+}
+function changeMonthtoNumber(month){
+    var value = null;
+    if(month === "January"){
+        value = "01";
+    }
+    else if(month === "February"){
+        value = "02";
+    }
+    else if(month === "March"){
+        value = "03";
+    }
+    else if(month === "April"){
+        value = "04";
+    }
+    else if(month === "May"){
+        value = "05";
+    }
+    else if(month === "June"){
+        value = "06";
+    }
+    else if(month === "July"){
+        value = "07";
+    }
+    else if(month === "August"){
+        value = "08";
+    }
+    else if(month === "September"){
+        value = "09";
+    }
+    else if(month === "October"){
+        value = "10";
+    }
+    else if(month === "November"){
+        value = "11";
+    }
+    else if(month === "December"){
+        value = "12";
+    }
+    return value;
+}
 function toggleDropdown(elementId) {
     document.getElementById(elementId).classList.toggle("show");
 }
@@ -224,7 +369,7 @@ function parseETDFile(reader, etd_list) {
                 var customer = lines[++line_num];
                 var turbine_time = lines[++line_num];
                 var battery_time = lines[++line_num];
-                console.log(id + ", " + firmware + ", " + cpld + ", " + sn + ", " + customer + ", " + turbine_time + ", " + battery_time + ", ");
+                //console.log(id + ", " + firmware + ", " + cpld + ", " + sn + ", " + customer + ", " + turbine_time + ", " + battery_time + ", ");
 
                 // Create a new etd Object
                 var new_etd = createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_time);
