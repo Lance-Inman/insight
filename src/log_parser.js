@@ -140,19 +140,25 @@ function addTable(etd) {
             //date.setHours(parseInt(timeRegexmatch[0].substring(0,1)),parseInt(timeRegexmatch[0].substring(3,4)), parseInt(timeRegexmatch[0].substring(6,7)));
             //Data Grabbing
             var batteryRegex = /Info, [0-9.]+(?=V)/g;
-            var temperatureRegex = /[0-9.]+(?=F)/g;
-            var turbVRegex = /V, [0-9.]+(?=V)/g;
+            var batteryRegex2 = /Battery V, [0-9.]+(?=V)/g;
+            var temperatureRegex = /[-]*[0-9.]+(?=F)/g;
+            var turbVRegex = /Turbine V, [0-9.]+(?=V)/g;
             var pressureRegex = /[0-9.]+(?=PSI)/g;
             var rpmRegex = /[0-9.]+(?=RPM)/g;
             var matchTurbV = turbVRegex.exec(values[3]);
             if(matchTurbV !== null){
                 typegraph = "turbineVoltage";
-                turbVData.push(([date,parseFloat(matchTurbV[0].substring(3))]))
+                turbVData.push(([date,parseFloat(matchTurbV[0].split(" ")[2])]));
             }
             var matchBattery = batteryRegex.exec(values[3]);
+            var matchBattery2 = batteryRegex2.exec(values[3]);
             if(matchBattery !== null){
                 typegraph = "battery";
                 batteryData.push([date,parseFloat(matchBattery[0].substring(6))]);
+            }
+            if(matchBattery2 !== null){
+                typegraph = "battery";
+                batteryData.push([date,parseFloat(matchBattery2[0].split(" ")[2])]);
             }
             var matchTemp = temperatureRegex.exec(values[3]);
             if(matchTemp !== null){
