@@ -49,6 +49,104 @@ function readFiles(files) {
         reader.readAsText(files[0]);
     }
 }
+function hexToText(hex){
+    if(hex === "0x114"){
+        return "Battery Voltage"
+    }
+    if(hex === "0x115"){
+        return "Turbine Voltage"
+    }
+    if(hex === "0x11A"){
+        return "Pressure Info"
+    }
+    if(hex === "0x11B"){
+        return "RPM"
+    }
+    if(hex === "0x10A"){
+        return "Board Temp"
+    }
+    if(hex === "0x100"){
+        return "EOT Transmit"
+    }
+    if(hex === "0x120"){
+        return "EOT Receive"
+    }
+    if(hex === "0x1"){
+        return "Real Time Clock Not Set"
+    }
+    if(hex === "0x2"){
+        return "Micro SD Card Not Installed"
+    }
+    if(hex === "0x3"){
+        return "Brake Solenoid Not Detected"
+    }
+    if(hex === "0x4"){
+        return "Pressure Transducer Failure"
+    }
+    if(hex === "0x5"){
+        return "HVM Failure"
+    }
+    if(hex === "0x6"){
+        return "GPS Not Detected"
+    }
+    if(hex === "0x7"){
+        return "Accelerometer Failure"
+    }
+    if(hex === "0x8"){
+        return "Real Time Clock Not Functioning"
+    }
+    if(hex === "0x9"){
+        return "Display Failure"
+    }
+    if(hex === "0xA"){
+        return "Temp Sensor Failure"
+    }
+    if(hex === "0xB"){
+        return "Voltage 3.3 Out Of Tolerance"
+    }
+    if(hex === "0xC"){
+        return "Voltage 5.0 Out Of Tolerance"
+    }
+    if(hex === "0xD"){
+        return "Voltage 12.0 Out Of Tolerance"
+    }
+    if(hex === "0xE"){
+        return "Brake Solenoid Failed During Dump"
+    }
+    if(hex === "0xF"){
+        return "Turbine Not Spinning"
+    }
+    if(hex === "0x10"){
+        return "Turbine RPM Varying Too Much"
+    }
+    if(hex === "0x11"){
+        return "Turbine RPM Out Of Spec VS Pressure"
+    }
+    if(hex === "0x12"){
+        return "Turbine Voltage Out Of Spec VS Pressure"
+    }
+    if(hex === "0x13"){
+        return "Modem Not Present"
+    }
+    if(hex === "0x14"){
+        return "Charger Failure"
+    }
+    if(hex === "0x15"){
+        return "Radio Failure"
+    }
+    if(hex === "0x16"){
+        return "CPLD Electronic Memory Loss"
+    }
+    if(hex === "0x12E"){
+        return "GPS Power Disabled"
+    }
+    if(hex === "0x17"){
+        return "0x17"
+    }
+    if(hex === "0x1D") {
+        return "0x1D";
+    }
+}
 //var alldata = [];
 function addTable(etd) {
     // Create a dropdown panel for the etd
@@ -80,7 +178,7 @@ function addTable(etd) {
         var hexDropdown = document.createElement("div");
         hexDropdown.setAttribute("class", "hex-dropdown");
         var hexButton = document.createElement("button");
-        hexButton.appendChild(document.createTextNode(tracked_code.code+": "+tracked_code.logs.length));
+        hexButton.appendChild(document.createTextNode(hexToText(tracked_code.code)+": "+tracked_code.logs.length));
         hexButton.setAttribute("onclick", ("toggleDropdown(\""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num)+"\")"));
         hexButton.setAttribute("class", "hex-dropdown-trigger");
         var hexDropdownContent = document.createElement("div");
@@ -135,7 +233,18 @@ function addTable(etd) {
             var dayRegexmatch = dayRegex.exec(values[0]);
             var timeRegexmatch = timeRegex.exec(values[0]);
             var month = changeMonthtoNumber(monthRegexmatch[0]);
-            var date = new Date(yearRegexMatch[0]+"/"+ month + "/" + dayRegexmatch[0] + " " + timeRegexmatch);
+            try{
+                if(monthRegexmatch[0] != null && dayRegexmatch[0]!=null && timeRegexmatch[0]!=null && yearRegexMatch[0]){
+                    var date = new Date(yearRegexMatch[0]+"/"+ month + "/" + dayRegexmatch[0] + " " + timeRegexmatch);
+                } else{
+                    console.log(values);
+                }
+            }catch (err){
+                console.log("Error In Log File, Data reads as:");
+                console.log(values);
+                continue;
+            }
+
             //date.setFullYear(parseInt(yearRegexMatch[0]), month, parseInt(dayRegexmatch[0]));
             //date.setHours(parseInt(timeRegexmatch[0].substring(0,1)),parseInt(timeRegexmatch[0].substring(3,4)), parseInt(timeRegexmatch[0].substring(6,7)));
             //Data Grabbing

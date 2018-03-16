@@ -143,6 +143,9 @@ button {
     cursor: pointer;
     position: inherit;
     width: 100%;
+    margin-top: .5%;
+    margin-bottom: .5%;
+    padding: 2px 0px 2px 0px;
 }
 
 .etd-dropdown-content {
@@ -156,9 +159,14 @@ button {
 }
 
 .hex-dropdown-trigger {
+    min-width: 72px;
+    font-size: 1em;
     cursor: pointer;
     position: inherit;
-    width: 100px;
+    padding:5px;
+    width: 10%;
+    margin-left: 10px;
+    margin-bottom: 5px;
 }
 
 .hex-dropdown-content {
