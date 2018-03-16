@@ -1,5 +1,4 @@
 var etd_list = [];
-
 function readFiles(files) {
     var index = 0;
 
@@ -21,7 +20,11 @@ function readFiles(files) {
         };
     reader.onload =
         function () {
-            console.log("parsed file " + index + "/" + files.length);
+            console.log("parsed file " + (index+1) + "/" + files.length);
+            var multiplier = 100/files.length;
+            var currentPercent = multiplier * (index+1);
+            document.getElementById("grid-input-panel").setAttribute("style","background: linear-gradient(to right, " +
+                " #4CAF50 0%,#4CAF50 "+currentPercent+"%,#424242 "+(currentPercent-1)+"%,#424242 100%);");
             etd_list = parseETDFile(reader, etd_list);
             if (index + 1 < files.length) {
                 reader.readAsText(files[++index]);
@@ -42,27 +45,10 @@ function readFiles(files) {
 
     if (files.length > 0) {
         document.getElementById("status").innerHTML = "Loading files...";
-        document.getElementById("grid-input-panel").style.backgroundColor = "#FFEB3B";
         files = [].slice.call(files).sort(chronCompare);
         document.getElementById("status").innerHTML = "Parsing files...";
-        document.getElementById("input-panel").style.backgroundColor = "#FFEB3B";
         reader.readAsText(files[0]);
     }
-}
-function mergeSort (arr) {
-    if (arr.length === 1) {
-        // return once we hit an array with a single item
-        return arr
-    }
-
-    const middle = Math.floor(arr.length / 2); // get the middle item of the array rounded down
-    const left = arr.slice(0, middle); // items on the left side
-    const right = arr.slice(middle); // items on the right side
-
-    return merge(
-        mergeSort(left),
-        mergeSort(right)
-    )
 }
 
 // compare the arrays item by item and return the concatenated result
@@ -201,6 +187,7 @@ function addTable(etd) {
     const turbVData = [];
     const pressureData = [];
     const rpmData = [];
+    var graphSet = [];
     // For each hex code tracked by the etd
     var isEmpty = true;
     for(var code_num = 0; code_num < etd.tracked_codes.length; code_num++) {
@@ -349,31 +336,31 @@ function addTable(etd) {
         //Finally we add an event listener to create the graph when you click on the graphs table button
         if(tempData[0] !== null) {
             if (typegraph === "temperature") {
-                makegraph(tempData,"Temperature over Time","red","Degrees Fahrenheit",hexDropdownContent,hexButton);
+                graphSet.push(makegraph(tempData,"Temperature over Time","red","Degrees Fahrenheit",hexDropdownContent,hexButton));
                 showDataButton.setAttribute("style","background-color:red;")
             }
         }
         if(turbVData[0] !== null) {
            if (typegraph === "turbineVoltage") {
-               makegraph(turbVData,"Turbine voltage over time","blue","Voltage",hexDropdownContent,hexButton);
+               graphSet.push(makegraph(turbVData,"Turbine voltage over time","blue","Voltage",hexDropdownContent,hexButton));
                showDataButton.setAttribute("style","background-color:blue;")
            }
         }
         if(batteryData[0] !== null) {
             if (typegraph === "battery") {
-                makegraph(batteryData,"Battery Voltage over Time","green","Battery Voltage",hexDropdownContent,hexButton);
+                graphSet.push(makegraph(batteryData,"Battery Voltage over Time","green","Battery Voltage",hexDropdownContent,hexButton));
                 showDataButton.setAttribute("style","background-color:green;")
             }
         }
         if(pressureData[0] !== null) {
             if (typegraph === "pressure") {
-                makegraph(pressureData,"Pressure over Time","purple","PSI",hexDropdownContent,hexButton);
+                graphSet.push(makegraph(pressureData,"Pressure over Time","purple","PSI",hexDropdownContent,hexButton));
                 showDataButton.setAttribute("style","background-color:purple;")
             }
         }
         if(rpmData[0] !== null){
             if(typegraph === "rpm"){
-                makegraph(rpmData,"Rotations per minute","orange","RPM",hexDropdownContent,hexButton);
+                graphSet.push(makegraph(rpmData,"Rotations per minute","orange","RPM",hexDropdownContent,hexButton));
                 showDataButton.setAttribute("style","background-color:orange;")
             }
         }
@@ -385,13 +372,20 @@ function addTable(etd) {
         }
         hexDropdown.appendChild(hexDropdownContent);
         etdDropdownContent.appendChild(hexDropdown);
-    }
 
+    }
     if(isEmpty) {
         console.log("empty");
         var empty = document.createElement("p");
         empty.appendChild(document.createTextNode("No parsed codes found"));
         etdDropdownContent.appendChild(empty);
+    }
+    if(graphSet.length > 1){
+        var sync = Dygraph.synchronize(graphSet, {
+            zoom: true,
+            selection: true,
+            range: false
+        });
     }
 
     etdDropdown.appendChild(etdDropdownContent);
@@ -405,7 +399,7 @@ function makegraph(data,name,color,yaxisLabel,parent,dropdown) {
     newgraph.style.color = "black";
     newgraph.style.backgroundColor = "white";
     parent.appendChild(newgraph);
-    const nGraph = new Dygraph(
+    var nGraph = new Dygraph(
         newgraph,
         data, {
             legend: 'always',
@@ -420,6 +414,7 @@ function makegraph(data,name,color,yaxisLabel,parent,dropdown) {
     dropdown.addEventListener("click", function () {
         nGraph.resize();
     });
+    return nGraph;
 }
 //returns true if code is a graphable type
 function isGraphable(hex){
