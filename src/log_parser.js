@@ -49,6 +49,41 @@ function readFiles(files) {
         reader.readAsText(files[0]);
     }
 }
+function mergeSort (arr) {
+    if (arr.length === 1) {
+        // return once we hit an array with a single item
+        return arr
+    }
+
+    const middle = Math.floor(arr.length / 2); // get the middle item of the array rounded down
+    const left = arr.slice(0, middle); // items on the left side
+    const right = arr.slice(middle); // items on the right side
+
+    return merge(
+        mergeSort(left),
+        mergeSort(right)
+    )
+}
+
+// compare the arrays item by item and return the concatenated result
+function merge (left, right) {
+    var result = [];
+    var indexLeft = 0;
+    var indexRight = 0;
+
+    while (indexLeft < left.length && indexRight < right.length) {
+        if (left[indexLeft] < right[indexRight]) {
+            result.push(left[indexLeft]);
+            indexLeft++;
+        } else {
+            result.push(right[indexRight]);
+            indexRight++;
+        }
+    }
+
+    return result.concat(left.slice(indexLeft)).concat(right.slice(indexRight))
+}
+
 function hexToText(hex){
     if(hex === "0x114"){
         return "Battery Voltage"
@@ -147,7 +182,7 @@ function hexToText(hex){
         return "0x1D";
     }
 }
-//var alldata = [];
+
 function addTable(etd) {
     // Create a dropdown panel for the etd
     var etdDropdown = document.createElement("div");
@@ -170,21 +205,44 @@ function addTable(etd) {
     var isEmpty = true;
     for(var code_num = 0; code_num < etd.tracked_codes.length; code_num++) {
         var tracked_code = etd.tracked_codes[code_num];
+        graphable = isGraphable(tracked_code.code);
         var typegraph = "";
         if(tracked_code.logs.length === 0) continue;
-
         isEmpty = false;
         // Create a dropdown panel for the hex code
-        var hexDropdown = document.createElement("div");
-        hexDropdown.setAttribute("class", "hex-dropdown");
-        var hexButton = document.createElement("button");
-        hexButton.appendChild(document.createTextNode(hexToText(tracked_code.code)+": "+tracked_code.logs.length));
-        hexButton.setAttribute("onclick", ("toggleDropdown(\""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num)+"\")"));
-        hexButton.setAttribute("class", "hex-dropdown-trigger");
-        var hexDropdownContent = document.createElement("div");
-        hexDropdownContent.setAttribute("id", (""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num)));
-        hexDropdownContent.setAttribute("class", "hex-dropdown-content");
-        hexDropdown.appendChild(hexButton);
+        if(graphable){
+            var hexDropdown = document.createElement("div");
+            hexDropdown.setAttribute("class", "hex-dropdown");
+            var hexButton = document.createElement("button");
+            hexButton.appendChild(document.createTextNode(hexToText(tracked_code.code)+": "+tracked_code.logs.length));
+            hexButton.setAttribute("onclick", ("toggleDropdown(\""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num)+"-graph" +"\")"));
+            hexButton.setAttribute("class", "hex-dropdown-trigger");
+            var hexDropdownContent = document.createElement("div");
+            hexDropdownContent.setAttribute("id", (""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num+"-graph")));
+            hexDropdownContent.setAttribute("class", "hex-dropdown-content");
+            hexDropdown.appendChild(hexButton);
+
+            //Create the toggle for the data below the graph
+            var showDataButton = document.createElement("button");
+            showDataButton.setAttribute("class", "data-dropdown-trigger");
+            showDataButton.setAttribute("onclick", ("toggleDropdown(\""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num)+"-data"+"\")"));
+            showDataButton.innerHTML = "Toggle Data";
+            var dataDropDownContent = document.createElement("div");
+            dataDropDownContent.setAttribute("id", (""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num+"-data")));
+            dataDropDownContent.setAttribute("class", "hex-dropdown-content");
+            showDataButton.appendChild(dataDropDownContent);
+        }else{
+            var hexDropdown = document.createElement("div");
+            hexDropdown.setAttribute("class", "hex-dropdown");
+            var hexButton = document.createElement("button");
+            hexButton.appendChild(document.createTextNode(hexToText(tracked_code.code)+": "+tracked_code.logs.length));
+            hexButton.setAttribute("onclick", ("toggleDropdown(\""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num)+"-graph" +"\")"));
+            hexButton.setAttribute("class", "hex-dropdown-trigger");
+            var hexDropdownContent = document.createElement("div");
+            hexDropdownContent.setAttribute("id", (""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num+"-graph")));
+            hexDropdownContent.setAttribute("class", "hex-dropdown-content");
+            hexDropdown.appendChild(hexButton);
+        }
 
         // Create a table and table header
         var table = document.createElement("table");
@@ -244,10 +302,6 @@ function addTable(etd) {
                 console.log(values);
                 continue;
             }
-
-            //date.setFullYear(parseInt(yearRegexMatch[0]), month, parseInt(dayRegexmatch[0]));
-            //date.setHours(parseInt(timeRegexmatch[0].substring(0,1)),parseInt(timeRegexmatch[0].substring(3,4)), parseInt(timeRegexmatch[0].substring(6,7)));
-            //Data Grabbing
             var batteryRegex = /Info, [0-9.]+(?=V)/g;
             var batteryRegex2 = /Battery V, [0-9.]+(?=V)/g;
             var temperatureRegex = /[-]*[0-9.]+(?=F)/g;
@@ -296,29 +350,39 @@ function addTable(etd) {
         if(tempData[0] !== null) {
             if (typegraph === "temperature") {
                 makegraph(tempData,"Temperature over Time","red","Degrees Fahrenheit",hexDropdownContent,hexButton);
+                showDataButton.setAttribute("style","background-color:red;")
             }
         }
         if(turbVData[0] !== null) {
            if (typegraph === "turbineVoltage") {
                makegraph(turbVData,"Turbine voltage over time","blue","Voltage",hexDropdownContent,hexButton);
+               showDataButton.setAttribute("style","background-color:blue;")
            }
         }
         if(batteryData[0] !== null) {
             if (typegraph === "battery") {
                 makegraph(batteryData,"Battery Voltage over Time","green","Battery Voltage",hexDropdownContent,hexButton);
+                showDataButton.setAttribute("style","background-color:green;")
             }
         }
         if(pressureData[0] !== null) {
             if (typegraph === "pressure") {
-                makegraph(pressureData,"Pressure over Time","grey","PSI",hexDropdownContent,hexButton);
+                makegraph(pressureData,"Pressure over Time","purple","PSI",hexDropdownContent,hexButton);
+                showDataButton.setAttribute("style","background-color:purple;")
             }
         }
         if(rpmData[0] !== null){
             if(typegraph === "rpm"){
                 makegraph(rpmData,"Rotations per minute","orange","RPM",hexDropdownContent,hexButton);
+                showDataButton.setAttribute("style","background-color:orange;")
             }
         }
-        hexDropdownContent.appendChild(table);
+        if(graphable){
+            hexDropdownContent.appendChild(showDataButton);
+            dataDropDownContent.appendChild(table);
+        }else{
+            hexDropdownContent.appendChild(table)
+        }
         hexDropdown.appendChild(hexDropdownContent);
         etdDropdownContent.appendChild(hexDropdown);
     }
@@ -356,6 +420,25 @@ function makegraph(data,name,color,yaxisLabel,parent,dropdown) {
     dropdown.addEventListener("click", function () {
         nGraph.resize();
     });
+}
+//returns true if code is a graphable type
+function isGraphable(hex){
+    if(hex === "0x114"){
+        return true
+    }
+    if(hex === "0x115"){
+        return true
+    }
+    if(hex === "0x11A"){
+        return true
+    }
+    if(hex === "0x11B"){
+        return true
+    }
+    if(hex === "0x10A"){
+        return true
+    }
+    return false;
 }
 function changeMonthtoNumber(month){
     var value = null;
