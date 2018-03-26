@@ -78,7 +78,7 @@ button {
     line-height: 100%;
 }
 
-.options-dropdown {
+#options-dropdown {
     display: inline-block;
     float:right;
     grid-row:1;
@@ -195,4 +195,8 @@ table, th, td {
 }
 th {
     font-weight: bold;
+}
+#reparse {
+    display: none;
+    margin: 5px;
 }

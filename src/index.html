@@ -23,7 +23,7 @@
                 </div>
             </div>
             <span id="status-panel">Status: <a id="status">waiting for input</a></span>
-            <div class="options-dropdown">
+            <div id="options-dropdown">
                 <input type="button" class="help-button" onclick="location.href='http://insight.dpsrr.com/DPS_Insight_Manual.pdf';" value="?">
                 <button class="options-dropdown-trigger" onclick="toggleDropdown(&quot;options-dropdown-content&quot;)">Options</button>
             </div>
@@ -48,6 +48,7 @@
                 <label for="0x100">0x100: EOT Transmit</label></div>
             <div><input type="checkbox" name="hex-code" id="0x120" value="0x120">
                 <label for="0x120">0x120: EOT Receive</label></div>
+            <button id="reparse">Reparse files</button>
         </div>
     </div>
     <div id="graphdiv" style="background-color: white;width:100%;"></div>

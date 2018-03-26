@@ -1,8 +1,8 @@
 var etd_list = [];
+var reader = new FileReader();
 function readFiles(files) {
+    etd_list = [];
     var index = 0;
-
-    var reader = new FileReader();
     reader.onerror =
         function () {
             console.log("reading operation encountered an error");
@@ -46,6 +46,9 @@ function readFiles(files) {
     if (files.length > 0) {
         document.getElementById("status").innerHTML = "Loading files...";
         files = [].slice.call(files).sort(chronCompare);
+        var reparseButton = document.getElementById("reparse");
+        reparseButton.style.display = "inherit";
+        reparseButton.addEventListener("click",function(){readFiles(files)});
         document.getElementById("status").innerHTML = "Parsing files...";
         reader.readAsText(files[0]);
     }
@@ -69,7 +72,7 @@ function merge (left, right) {
 
     return result.concat(left.slice(indexLeft)).concat(right.slice(indexRight))
 }
-
+//If you pass in a string of the hex code it will return what the hex code means in plain english
 function hexToText(hex){
     if(hex === "0x114"){
         return "Battery Voltage"
@@ -192,23 +195,26 @@ function addTable(etd) {
     var isEmpty = true;
     for(var code_num = 0; code_num < etd.tracked_codes.length; code_num++) {
         var tracked_code = etd.tracked_codes[code_num];
-        graphable = isGraphable(tracked_code.code);
+        var graphable = isGraphable(tracked_code.code);
         var typegraph = "";
         if(tracked_code.logs.length === 0) continue;
         isEmpty = false;
         // Create a dropdown panel for the hex code
-        if(graphable){
-            var hexDropdown = document.createElement("div");
-            hexDropdown.setAttribute("class", "hex-dropdown");
-            var hexButton = document.createElement("button");
-            hexButton.appendChild(document.createTextNode(hexToText(tracked_code.code)+": "+tracked_code.logs.length));
-            hexButton.setAttribute("onclick", ("toggleDropdown(\""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num)+"-graph" +"\")"));
-            hexButton.setAttribute("class", "hex-dropdown-trigger");
-            var hexDropdownContent = document.createElement("div");
-            hexDropdownContent.setAttribute("id", (""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num+"-graph")));
-            hexDropdownContent.setAttribute("class", "hex-dropdown-content");
-            hexDropdown.appendChild(hexButton);
 
+        var hexDropdown = document.createElement("div");
+        hexDropdown.setAttribute("class", "hex-dropdown");
+        var hexButton = document.createElement("button");
+        hexButton.appendChild(document.createTextNode(hexToText(tracked_code.code)+": "+tracked_code.logs.length));
+        hexButton.setAttribute("onclick", ("toggleDropdown(\""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num)+"-graph" +"\")"));
+        hexButton.setAttribute("class", "hex-dropdown-trigger");
+        var hexDropdownContent = document.createElement("div");
+        hexDropdownContent.setAttribute("id", (""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num+"-graph")));
+        hexDropdownContent.setAttribute("class", "hex-dropdown-content");
+        hexDropdown.appendChild(hexButton);
+        // If the hex code is graphable we will make a different structure compared to if its not graphable - if you
+        // view the result, this basically just makes non graphables show up in a table and graphables to show a graph
+        // with the option of showing the data, this is generally quicker to do it this way for graphables too
+        if(graphable){
             //Create the toggle for the data below the graph
             var showDataButton = document.createElement("button");
             showDataButton.setAttribute("class", "data-dropdown-trigger");
@@ -218,17 +224,6 @@ function addTable(etd) {
             dataDropDownContent.setAttribute("id", (""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num+"-data")));
             dataDropDownContent.setAttribute("class", "hex-dropdown-content");
             showDataButton.appendChild(dataDropDownContent);
-        }else{
-            var hexDropdown = document.createElement("div");
-            hexDropdown.setAttribute("class", "hex-dropdown");
-            var hexButton = document.createElement("button");
-            hexButton.appendChild(document.createTextNode(hexToText(tracked_code.code)+": "+tracked_code.logs.length));
-            hexButton.setAttribute("onclick", ("toggleDropdown(\""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num)+"-graph" +"\")"));
-            hexButton.setAttribute("class", "hex-dropdown-trigger");
-            var hexDropdownContent = document.createElement("div");
-            hexDropdownContent.setAttribute("id", (""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num+"-graph")));
-            hexDropdownContent.setAttribute("class", "hex-dropdown-content");
-            hexDropdown.appendChild(hexButton);
         }
 
         // Create a table and table header
@@ -247,7 +242,6 @@ function addTable(etd) {
         header.appendChild(td3);
         header.appendChild(td4);
         table.appendChild(header);
-
         // For each log of the tracked code
         for(var log_num = 0; log_num < tracked_code.logs.length; log_num++) {
             // Create a table row
@@ -264,7 +258,8 @@ function addTable(etd) {
             //-----------------------Graphing------------------------------//
             /*we start with the regex commands which need to be unique to each
               set of data so that we don't have overlapping matching, hence the
-              Info, and V,
+              Info, and Battery V, for batteryRegex and batteryRegex2 (the
+              reason for the two regexes is because our log files changes)
               We then check for matches and cutout the unneeded text using the
               substring method, while adding it to our data section
             */
@@ -279,7 +274,7 @@ function addTable(etd) {
             var timeRegexmatch = timeRegex.exec(values[0]);
             var month = changeMonthtoNumber(monthRegexmatch[0]);
             try{
-                if(monthRegexmatch[0] != null && dayRegexmatch[0]!=null && timeRegexmatch[0]!=null && yearRegexMatch[0]){
+                if(monthRegexmatch[0] !== null && dayRegexmatch[0] !==null && timeRegexmatch[0] !== null && yearRegexMatch[0]){
                     var date = new Date(yearRegexMatch[0]+"/"+ month + "/" + dayRegexmatch[0] + " " + timeRegexmatch);
                 } else{
                     console.log(values);
@@ -295,6 +290,7 @@ function addTable(etd) {
             var turbVRegex = /Turbine V, [0-9.]+(?=V)/g;
             var pressureRegex = /[0-9.]+(?=PSI)/g;
             var rpmRegex = /[0-9.]+(?=RPM)/g;
+            //We systematically regex check the values to see if it corresponds to a type
             var matchTurbV = turbVRegex.exec(values[3]);
             if(matchTurbV !== null){
                 typegraph = "turbineVoltage";
@@ -331,9 +327,10 @@ function addTable(etd) {
             row.appendChild(td4);
             table.appendChild(row);
         }
-        //For each of the if and else if statements we make sure that the graph type (or regex that matched)
-        //is of the correct type to make the graph, we then make a div and set up its attributes
-        //Finally we add an event listener to create the graph when you click on the graphs table button
+        /*For each of the if and else if statements we make sure that the graph type (or regex that matched)
+          is of the correct type to make the graph, we then make a div and set up its attributes
+          Finally we add an event listener to redraw the graph when you click on the graphs table button
+        */
         if(tempData[0] !== null) {
             if (typegraph === "temperature") {
                 graphSet.push(makegraph(tempData,"Temperature over Time","red","Degrees Fahrenheit",hexDropdownContent,hexButton));
@@ -372,7 +369,6 @@ function addTable(etd) {
         }
         hexDropdown.appendChild(hexDropdownContent);
         etdDropdownContent.appendChild(hexDropdown);
-
     }
     if(isEmpty) {
         console.log("empty");
@@ -387,10 +383,12 @@ function addTable(etd) {
             range: false
         });
     }
-
     etdDropdown.appendChild(etdDropdownContent);
     var element = document.getElementById("results-panel");
     element.appendChild(etdDropdown);
+    //Adding the button to reparse - when reparsing we get super slow and the numbers are not in order
+
+
 }
 function makegraph(data,name,color,yaxisLabel,parent,dropdown) {
     var newgraph = document.createElement("div");
@@ -416,7 +414,7 @@ function makegraph(data,name,color,yaxisLabel,parent,dropdown) {
     });
     return nGraph;
 }
-//returns true if code is a graphable type
+//returns true if code is a graphable type - Such as battery voltage, board temp etc.
 function isGraphable(hex){
     if(hex === "0x114"){
         return true
@@ -435,6 +433,7 @@ function isGraphable(hex){
     }
     return false;
 }
+//Changes month passed properly (Such as January with a capital J) to a value coresponding to that month like 01
 function changeMonthtoNumber(month){
     var value = null;
     if(month === "January"){
