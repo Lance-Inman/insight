@@ -335,13 +335,11 @@ function addTable(etd) {
             if(matchThreeVoltRail !== null){
                 typegraph = "threeVoltRail";
                 threeVoltRailData.push([date, parseFloat(matchThreeVoltRail[0])]);
-                console.log("Three volt match " + matchThreeVoltRail[0])
             }
             var matchFiveVoltRail = fiveVoltRegex.exec(values[3]);
             if(matchFiveVoltRail !== null){
                 typegraph = "fiveVoltRail";
                 fiveVoltRailData.push([date, parseFloat(matchFiveVoltRail[0])]);
-                console.log("Five volt match " + matchFiveVoltRail[0]);
             }
             row.appendChild(td1);
             row.appendChild(td2);
