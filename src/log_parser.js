@@ -75,100 +75,106 @@ function merge (left, right) {
 //If you pass in a string of the hex code it will return what the hex code means in plain english
 function hexToText(hex){
     if(hex === "0x114"){
-        return "Battery Voltage"
+        return "Battery Voltage";
     }
     if(hex === "0x115"){
-        return "Turbine Voltage"
+        return "Turbine Voltage";
     }
     if(hex === "0x11A"){
-        return "Pressure Info"
+        return "Pressure Info";
     }
     if(hex === "0x11B"){
-        return "RPM"
+        return "RPM";
     }
     if(hex === "0x10A"){
-        return "Board Temp"
+        return "Board Temp";
     }
     if(hex === "0x100"){
-        return "EOT Transmit"
+        return "EOT Transmit";
     }
     if(hex === "0x120"){
-        return "EOT Receive"
+        return "EOT Receive";
     }
     if(hex === "0x1"){
-        return "Real Time Clock Not Set"
+        return "Real Time Clock Not Set";
     }
     if(hex === "0x2"){
-        return "Micro SD Card Not Installed"
+        return "Micro SD Card Not Installed";
     }
     if(hex === "0x3"){
-        return "Brake Solenoid Not Detected"
+        return "Brake Solenoid Not Detected";
     }
     if(hex === "0x4"){
-        return "Pressure Transducer Failure"
+        return "Pressure Transducer Failure";
     }
     if(hex === "0x5"){
-        return "HVM Failure"
+        return "HVM Failure";
     }
     if(hex === "0x6"){
-        return "GPS Not Detected"
+        return "GPS Not Detected";
     }
     if(hex === "0x7"){
-        return "Accelerometer Failure"
+        return "Accelerometer Failure";
     }
     if(hex === "0x8"){
-        return "Real Time Clock Not Functioning"
+        return "Real Time Clock Not Functioning";
     }
     if(hex === "0x9"){
-        return "Display Failure"
+        return "Display Failure";
     }
     if(hex === "0xA"){
-        return "Temp Sensor Failure"
+        return "Temp Sensor Failure";
     }
     if(hex === "0xB"){
-        return "Voltage 3.3 Out Of Tolerance"
+        return "Voltage 3.3 Out Of Tolerance";
     }
     if(hex === "0xC"){
-        return "Voltage 5.0 Out Of Tolerance"
+        return "Voltage 5.0 Out Of Tolerance";
     }
     if(hex === "0xD"){
-        return "Voltage 12.0 Out Of Tolerance"
+        return "Voltage 12.0 Out Of Tolerance";
     }
     if(hex === "0xE"){
-        return "Brake Solenoid Failed During Dump"
+        return "Brake Solenoid Failed During Dump";
     }
     if(hex === "0xF"){
-        return "Turbine Not Spinning"
+        return "Turbine Not Spinning";
     }
     if(hex === "0x10"){
-        return "Turbine RPM Varying Too Much"
+        return "Turbine RPM Varying Too Much";
     }
     if(hex === "0x11"){
-        return "Turbine RPM Out Of Spec VS Pressure"
+        return "Turbine RPM Out Of Spec VS Pressure";
     }
     if(hex === "0x12"){
-        return "Turbine Voltage Out Of Spec VS Pressure"
+        return "Turbine Voltage Out Of Spec VS Pressure";
     }
     if(hex === "0x13"){
-        return "Modem Not Present"
+        return "Modem Not Present";
     }
     if(hex === "0x14"){
-        return "Charger Failure"
+        return "Charger Failure";
     }
     if(hex === "0x15"){
-        return "Radio Failure"
+        return "Radio Failure";
     }
     if(hex === "0x16"){
-        return "CPLD Electronic Memory Loss"
+        return "CPLD Electronic Memory Loss";
     }
     if(hex === "0x12E"){
-        return "GPS Power Disabled"
+        return "GPS Power Disabled";
     }
     if(hex === "0x17"){
-        return "0x17"
+        return "0x17";
     }
     if(hex === "0x1D") {
         return "0x1D";
+    }
+    if(hex === "0x138"){
+        return "3.3 Rail Voltage";
+    }
+    if(hex === "0x139"){
+        return "5.0 Rail Voltage";
     }
 }
 
@@ -190,6 +196,8 @@ function addTable(etd) {
     const turbVData = [];
     const pressureData = [];
     const rpmData = [];
+    const fiveVoltRailData = [];
+    const threeVoltRailData = [];
     var graphSet = [];
     // For each hex code tracked by the etd
     var isEmpty = true;
@@ -290,6 +298,8 @@ function addTable(etd) {
             var turbVRegex = /Turbine V, [0-9.]+(?=V)/g;
             var pressureRegex = /[0-9.]+(?=PSI)/g;
             var rpmRegex = /[0-9.]+(?=RPM)/g;
+            var threeVoltRegex = /(?<=3.3 Rail V, )[0-9.]+(?=V)/;
+            var fiveVoltRegex = /(?<=5.0 Rail V, )[0-9.]+(?=V)/;
             //We systematically regex check the values to see if it corresponds to a type
             var matchTurbV = turbVRegex.exec(values[3]);
             if(matchTurbV !== null){
@@ -317,9 +327,21 @@ function addTable(etd) {
                 pressureData.push([date,parseFloat(matchPressure[0])]);
             }
             var matchRPM = rpmRegex.exec(values[3]);
-            if(matchRPM !== null){
+            if(matchRPM !== null) {
                 typegraph = "rpm";
-                rpmData.push([date,parseFloat(matchRPM[0])]);
+                rpmData.push([date, parseFloat(matchRPM[0])]);
+            }
+            var matchThreeVoltRail = threeVoltRegex.exec(values[3]);
+            if(matchThreeVoltRail !== null){
+                typegraph = "threeVoltRail";
+                threeVoltRailData.push([date, parseFloat(matchThreeVoltRail[0])]);
+                console.log("Three volt match " + matchThreeVoltRail[0])
+            }
+            var matchFiveVoltRail = fiveVoltRegex.exec(values[3]);
+            if(matchFiveVoltRail !== null){
+                typegraph = "fiveVoltRail";
+                fiveVoltRailData.push([date, parseFloat(matchFiveVoltRail[0])]);
+                console.log("Five volt match " + matchFiveVoltRail[0]);
             }
             row.appendChild(td1);
             row.appendChild(td2);
@@ -359,6 +381,18 @@ function addTable(etd) {
             if(typegraph === "rpm"){
                 graphSet.push(makegraph(rpmData,"Rotations per minute","orange","RPM",hexDropdownContent,hexButton));
                 showDataButton.setAttribute("style","background-color:orange;")
+            }
+        }
+        if(threeVoltRailData[0]!==null){
+            if(typegraph === "fiveVoltRail"){
+                graphSet.push(makegraph(fiveVoltRailData,"5 Volt Rail Voltage","grey","Voltage",hexDropdownContent,hexButton));
+                showDataButton.setAttribute("style","background-color:grey;")
+            }
+        }
+        if(fiveVoltRailData[0]!==null){
+            if(typegraph === "threeVoltRail"){
+                graphSet.push(makegraph(threeVoltRailData,"3.3 Volt Rail Voltage","grey","Voltage",hexDropdownContent,hexButton));
+                showDataButton.setAttribute("style","background-color:grey;")
             }
         }
         if(graphable){
@@ -429,6 +463,12 @@ function isGraphable(hex){
         return true
     }
     if(hex === "0x10A"){
+        return true
+    }
+    if(hex === "0x138"){
+        return true
+    }
+    if(hex === "0x139"){
         return true
     }
     return false;
@@ -629,6 +669,12 @@ function loadOptions(etd) {
     }
     if(document.querySelector('input[value="0x120"]').checked) {
         etd.addCode("0x120");
+    }
+    if(document.querySelector('input[value="0x138"]').checked) {
+        etd.addCode("0x138");
+    }
+    if(document.querySelector('input[value="0x139"]').checked) {
+        etd.addCode("0x139");
     }
     if(document.querySelector('input[value="critical"]').checked) {
         etd.addCode("0x1");
