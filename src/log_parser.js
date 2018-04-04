@@ -292,54 +292,47 @@ function addTable(etd) {
                 console.log(values);
                 continue;
             }
-            var batteryRegex = /Info, [0-9.]+(?=V)/g;
-            var batteryRegex2 = /Battery V, [0-9.]+(?=V)/g;
+            var batteryRegex = /(?<=Info, )[0-9.]+(?=V)/g;
+            var batteryRegex2 = /(?<=Battery V, )[0-9.]+(?=V)/g;
             var temperatureRegex = /[-]*[0-9.]+(?=F)/g;
-            var turbVRegex = /Turbine V, [0-9.]+(?=V)/g;
+            var turbVRegex = /(?<=Turbine V, )[0-9.]+(?=V)/g;
             var pressureRegex = /[0-9.]+(?=PSI)/g;
             var rpmRegex = /[0-9.]+(?=RPM)/g;
             var threeVoltRegex = /(?<=3.3 Rail V, )[0-9.]+(?=V)/;
             var fiveVoltRegex = /(?<=5.0 Rail V, )[0-9.]+(?=V)/;
             //We systematically regex check the values to see if it corresponds to a type
-            var matchTurbV = turbVRegex.exec(values[3]);
-            if(matchTurbV !== null){
-                typegraph = "turbineVoltage";
-                turbVData.push(([date,parseFloat(matchTurbV[0].split(" ")[2])]));
+            function pushMatches(regex,date,string,graphName,dataset){
+                var match = regex.exec(string);
+                if(match!==null){
+                    typegraph = graphName;
+                    dataset.push(([date,parseFloat(match[0])]));
+                }
             }
-            var matchBattery = batteryRegex.exec(values[3]);
-            var matchBattery2 = batteryRegex2.exec(values[3]);
-            if(matchBattery !== null){
-                typegraph = "battery";
-                batteryData.push([date,parseFloat(matchBattery[0].substring(6))]);
-            }
-            if(matchBattery2 !== null){
-                typegraph = "battery";
-                batteryData.push([date,parseFloat(matchBattery2[0].split(" ")[2])]);
-            }
-            var matchTemp = temperatureRegex.exec(values[3]);
-            if(matchTemp !== null){
-                typegraph = "temperature";
-                tempData.push([date,parseFloat(matchTemp[0])]);
-            }
-            var matchPressure = pressureRegex.exec(values[3]);
-            if(matchPressure !== null){
-                typegraph = "pressure";
-                pressureData.push([date,parseFloat(matchPressure[0])]);
-            }
-            var matchRPM = rpmRegex.exec(values[3]);
-            if(matchRPM !== null) {
-                typegraph = "rpm";
-                rpmData.push([date, parseFloat(matchRPM[0])]);
-            }
-            var matchThreeVoltRail = threeVoltRegex.exec(values[3]);
-            if(matchThreeVoltRail !== null){
-                typegraph = "threeVoltRail";
-                threeVoltRailData.push([date, parseFloat(matchThreeVoltRail[0])]);
-            }
-            var matchFiveVoltRail = fiveVoltRegex.exec(values[3]);
-            if(matchFiveVoltRail !== null){
-                typegraph = "fiveVoltRail";
-                fiveVoltRailData.push([date, parseFloat(matchFiveVoltRail[0])]);
+            if(typegraph === ""){
+                pushMatches(batteryRegex,date,values[3],"battery1",batteryData);
+                pushMatches(batteryRegex2,date,values[3],"battery2",batteryData);
+                pushMatches(temperatureRegex,date,values[3],"temperature",tempData);
+                pushMatches(turbVRegex,date,values[3],"turbineVoltage",turbVData);
+                pushMatches(pressureRegex,date,values[3],"pressure",pressureData);
+                pushMatches(rpmRegex,date,values[3],"rpm",rpmData);
+                pushMatches(threeVoltRegex,date,values[3],"threeVoltRail",threeVoltRailData);
+                pushMatches(fiveVoltRegex,date,values[3],"fiveVoltRail",fiveVoltRailData);
+            }else if(typegraph ==="battery1"){
+                pushMatches(batteryRegex,date,values[3],"battery1",batteryData);
+            }else if(typegraph === "battery2"){
+                pushMatches(batteryRegex2,date,values[3],"battery2",batteryData);
+            }else if(typegraph === "temperature"){
+                pushMatches(temperatureRegex,date,values[3],"temperature",tempData);
+            }else if(typegraph === "turbineVoltage"){
+                pushMatches(turbVRegex,date,values[3],"turbineVoltage",turbVData);
+            }else if(typegraph === "pressure"){
+                pushMatches(pressureRegex,date,values[3],"pressure",pressureData);
+            }else if(typegraph === "rpm"){
+                pushMatches(rpmRegex,date,values[3],"rpm",rpmData);
+            }else if(typegraph === "threeVoltRail"){
+                pushMatches(threeVoltRegex,date,values[3],"threeVoltRail",threeVoltRailData);
+            }else if(typegraph === "fiveVoltRail"){
+                pushMatches(fiveVoltRegex,date,values[3],"fiveVoltRail",fiveVoltRailData);
             }
             row.appendChild(td1);
             row.appendChild(td2);
@@ -364,7 +357,7 @@ function addTable(etd) {
            }
         }
         if(batteryData[0] !== null) {
-            if (typegraph === "battery") {
+            if (typegraph === "battery1" || typegraph === "battery2") {
                 graphSet.push(makegraph(batteryData,"Battery Voltage over Time","green","Battery Voltage",hexDropdownContent,hexButton));
                 showDataButton.setAttribute("style","background-color:green;")
             }
