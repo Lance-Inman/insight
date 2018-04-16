@@ -1,5 +1,37 @@
 var etd_list = [];
 var reader = new FileReader();
+
+
+var insertedelement = document.createElement("div");
+var inputed = document.createElement("input");
+var inputedLabel = document.createElement("label");
+
+insertedelement.setAttribute("id","0x11A-extra-checkbox-div");
+insertedelement.setAttribute("style","margin-left:20px;margin-bottom:5px;");
+inputed.setAttribute("type","checkbox");
+inputed.setAttribute("name","hex-code");
+inputed.setAttribute("id","0x11A-extra");
+inputed.setAttribute("value","0x11A-extra");
+inputedLabel.setAttribute("for","0x11A-extra");
+inputedLabel.innerHTML = "Use EOT Transmit Data? Warning: Much more points, slower load times";
+
+insertedelement.appendChild(inputed);
+insertedelement.appendChild(inputedLabel);
+document.getElementById("0x11A").addEventListener("click", function (){
+    if(document.getElementById("0x11A-extra-checkbox-div") === null){
+        insertAfter(insertedelement,document.getElementById("0x11A-checkbox-div"));
+    }
+   else{
+        var element = document.getElementById("0x11A-extra-checkbox-div");
+        element.parentNode.removeChild(element);
+    }
+});
+
+function insertAfter(el, referenceNode) {
+    referenceNode.parentNode.insertBefore(el, referenceNode.nextSibling);
+}
+
+
 function readFiles(files) {
     etd_list = [];
     var index = 0;
@@ -90,7 +122,7 @@ function hexToText(hex){
         return "Board Temp";
     }
     if(hex === "0x100"){
-        return "EOT Transmit";
+        return "0x100 Pressure Data";
     }
     if(hex === "0x120"){
         return "EOT Receive";
@@ -191,13 +223,13 @@ function addTable(etd) {
     etdDropdownContent.setAttribute("class", "etd-dropdown-content");
     etdDropdown.appendChild(etdButton);
     //Graphing assigning variables
-    const tempData = [];
-    const batteryData = [];
-    const turbVData = [];
-    const pressureData = [];
-    const rpmData = [];
-    const fiveVoltRailData = [];
-    const threeVoltRailData = [];
+    var tempData = [];
+    var batteryData = [];
+    var turbVData = [];
+    var pressureData = [];
+    var rpmData = [];
+    var fiveVoltRailData = [];
+    var threeVoltRailData = [];
     var graphSet = [];
     // For each hex code tracked by the etd
     var isEmpty = true;
@@ -389,6 +421,15 @@ function addTable(etd) {
                 showDataButton.setAttribute("style","background-color:grey;")
             }
         }
+        //reassigning data back to nothing, as the graph was already made
+        tempData = [];
+        batteryData = [];
+        turbVData = [];
+        pressureData = [];
+        rpmData = [];
+        fiveVoltRailData = [];
+        threeVoltRailData = [];
+
         if(graphable){
             hexDropdownContent.appendChild(showDataButton);
             dataDropDownContent.appendChild(table);
@@ -656,14 +697,14 @@ function loadOptions(etd) {
         etd.addCode("0x115");
     }
     if(document.querySelector('input[value="0x11A"]').checked) {
-        etd.addCode("0x11A");
-		etd.addCode("0x100");
+        if(document.querySelector('input[value="0x11A-extra"]').checked) {
+            etd.addCode("0x100");
+        }else{
+            etd.addCode("0x11A");
+        }
     }
     if(document.querySelector('input[value="0x11B"]').checked) {
         etd.addCode("0x11B");
-    }
-    if(document.querySelector('input[value="0x100"]').checked) {
-        etd.addCode("0x100");
     }
     if(document.querySelector('input[value="0x120"]').checked) {
         etd.addCode("0x120");
