@@ -1,37 +1,5 @@
 var etd_list = [];
 var reader = new FileReader();
-
-
-var insertedelement = document.createElement("div");
-var inputed = document.createElement("input");
-var inputedLabel = document.createElement("label");
-
-insertedelement.setAttribute("id","0x11A-extra-checkbox-div");
-insertedelement.setAttribute("style","margin-left:20px;margin-bottom:5px;");
-inputed.setAttribute("type","checkbox");
-inputed.setAttribute("name","hex-code");
-inputed.setAttribute("id","0x11A-extra");
-inputed.setAttribute("value","0x11A-extra");
-inputedLabel.setAttribute("for","0x11A-extra");
-inputedLabel.innerHTML = "Use EOT Transmit Data? Warning: Much more points, slower load times";
-
-insertedelement.appendChild(inputed);
-insertedelement.appendChild(inputedLabel);
-document.getElementById("0x11A").addEventListener("click", function (){
-    if(document.getElementById("0x11A-extra-checkbox-div") === null){
-        insertAfter(insertedelement,document.getElementById("0x11A-checkbox-div"));
-    }
-   else{
-        var element = document.getElementById("0x11A-extra-checkbox-div");
-        element.parentNode.removeChild(element);
-    }
-});
-
-function insertAfter(el, referenceNode) {
-    referenceNode.parentNode.insertBefore(el, referenceNode.nextSibling);
-}
-
-
 function readFiles(files) {
     etd_list = [];
     var index = 0;
@@ -299,9 +267,7 @@ function addTable(etd) {
             /*we start with the regex commands which need to be unique to each
               set of data so that we don't have overlapping matching, hence the
               Info, and Battery V, for batteryRegex and batteryRegex2 (the
-              reason for the two regexes is because our log files changes)
-              We then check for matches and cutout the unneeded text using the
-              substring method, while adding it to our data section
+              reason for the two regexes is because our log files changed)
             */
             //Date Formatting
             var yearRegex = /[0-9]{4}/g;
@@ -429,7 +395,6 @@ function addTable(etd) {
         rpmData = [];
         fiveVoltRailData = [];
         threeVoltRailData = [];
-
         if(graphable){
             hexDropdownContent.appendChild(showDataButton);
             dataDropDownContent.appendChild(table);
@@ -565,7 +530,6 @@ function createTrackedCode(code) {
 
 function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_time) {
     var obj = {};
-
     try {
         obj.id = id.match(/[0-9]{1,5}/)[0];
         obj.firmware = firmware.match(/[0-9]+.[0-9]+/)[0];
@@ -577,13 +541,10 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
     } catch (err) {
         return null;
     }
-
     obj.tracked_codes = [];
-
     obj.addCode = function(code) {
         this.tracked_codes.push(createTrackedCode(code));
     };
-
     obj.parse = function(line) {
         var values = line.split('\t');
         var code = values[2];
@@ -594,14 +555,12 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
             }
         }
     };
-
     obj.test = function() {
         console.log('tracked_codes.length: ');
         console.log(this.tracked_codes.length);
         console.log('logs.length');
         console.log(this.tracked_codes[0].logs.length);
     };
-
     obj.print = function() {
         console.log("ID: " + this.id);
         console.log("Firmware: " + this.firmware);
@@ -613,22 +572,18 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
             }
         }
     };
-
     return obj;
 }
-
 function parseETDFile(reader, etd_list) {
     if(!etd_list) {
         etd_list = [];
     }
-
     var lines = reader.result.split("\n");
     var line;
     var this_etd;
     for (var line_num = 0; line_num < lines.length-1; line_num++) {
         try {
             line = lines[line_num];
-
             // If a log header is found
             if (line.charAt(0) === "-" && (line_num + 7 < lines.length) && lines[line_num + 1].charAt(0) === 'E') {
                 // Parse the header
@@ -645,12 +600,10 @@ function parseETDFile(reader, etd_list) {
                 var new_etd = createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_time);
                 // If the etd initialized successfully
                 if (new_etd) {
-
                     // Scan existing ETDs for a match with the new ETD
                     var match_found = false;
                     for (var etd_num = 0; etd_num < etd_list.length; etd_num++) {
                         var existing_etd = etd_list[etd_num];
-
                         // If a match is found, set the existing ETD at this_etd
                         if (new_etd.id === existing_etd.id
                             && new_etd.firmware === existing_etd.firmware
@@ -662,7 +615,6 @@ function parseETDFile(reader, etd_list) {
                             break;
                         }
                     }
-
                     // If an existing ETD could not be found, set the new ETD as this_etd
                     if (match_found === false) {
                         etd_list.push(new_etd);
@@ -742,7 +694,37 @@ function loadOptions(etd) {
         etd.addCode("0x12E");
     }
 }
-
+//--------------------Creating extra element on 0x11A------------------------//
+var insertedelement = document.createElement("div");
+var inputed = document.createElement("input");
+var inputedLabel = document.createElement("label");
+//adding attributes to elements
+insertedelement.setAttribute("id","0x11A-extra-checkbox-div");
+insertedelement.setAttribute("style","margin-left:20px;margin-bottom:5px;");
+inputed.setAttribute("type","checkbox");
+inputed.setAttribute("name","hex-code");
+inputed.setAttribute("id","0x11A-extra");
+inputed.setAttribute("value","0x11A-extra");
+inputedLabel.setAttribute("for","0x11A-extra");
+inputedLabel.innerHTML = "Use EOT Transmit Data? Warning: Much more points, slower load times";
+//appending children
+insertedelement.appendChild(inputed);
+insertedelement.appendChild(inputedLabel);
+//adding action listeners
+document.getElementById("0x11A").addEventListener("click", function (){
+    if(document.getElementById("0x11A-extra-checkbox-div") === null){
+        insertAfter(insertedelement,document.getElementById("0x11A-checkbox-div"));
+    }
+    else{
+        var element = document.getElementById("0x11A-extra-checkbox-div");
+        element.parentNode.removeChild(element);
+    }
+});
+//----------------------------------End--------------------------------------//
+//function to insert am element after the reference
+function insertAfter(newNode, referenceNode) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
 function chronCompare(a, b) {
     a = a.name;
     b = b.name;
@@ -758,8 +740,6 @@ function chronCompare(a, b) {
             return 1;
         }
     }
-
-
     var aMonth = a.match(/(?:[0-9]+|\G)([A-Z]+)/);
     var bMonth = b.match(/(?:[0-9]+|\G)([A-Z]+)/);
     if (aMonth && bMonth) {
@@ -780,7 +760,6 @@ function chronCompare(a, b) {
             }
         }
     }
-
     var aDay = parseInt(a.match(/[0-9]+/));
     var bDay = parseInt(b.match(/[0-9]+/));
     if (aDay < bDay) {
