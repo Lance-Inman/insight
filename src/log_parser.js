@@ -270,10 +270,10 @@ function addTable(etd) {
               reason for the two regexes is because our log files changed)
             */
             //Date Formatting
-            var yearRegex = /[0-9]{4}/g;
-            var monthRegex = /[a-zA-Z]+/g;
-            var dayRegex = /^[0-9]{1,2}/g;
-            var timeRegex = /[0-9]{2}:[0-9]{2}:[0-9]{2}/g;
+            var yearRegex = /[0-9]{4}/;
+            var monthRegex = /[a-zA-Z]+/;
+            var dayRegex = /^[0-9]{1,2}/;
+            var timeRegex = /[0-9]{2}:[0-9]{2}:[0-9]{2}/;
             var yearRegexMatch = yearRegex.exec(values[0]);
             var monthRegexmatch = monthRegex.exec(values[0]);
             var dayRegexmatch = dayRegex.exec(values[0]);
@@ -290,21 +290,25 @@ function addTable(etd) {
                 console.log(values);
                 continue;
             }
-            var batteryRegex = /(?<=Info, )[0-9.]+(?=V)/g;
-            var batteryRegex2 = /(?<=Battery V, )[0-9.]+(?=V)/g;
-            var temperatureRegex = /[-]*[0-9.]+(?=F)/g;
-            var turbVRegex = /(?<=Turbine V, )[0-9.]+(?=V)/g;
-            var pressureRegex = /[0-9.]+(?=PSI)/g;
-            var rpmRegex = /[0-9.]+(?=RPM)/g;
-            var threeVoltRegex = /(?<=3.3 Rail V, )[0-9.]+(?=V)/;
-            var fiveVoltRegex = /(?<=5.0 Rail V, )[0-9.]+(?=V)/;
-            var zeroX100 = /(?<=Pressure = )[0-9]+/;
+            var batteryRegex = /(?:Info, )([0-9.]+(?=V))/;
+            var batteryRegex2 = /(?:Battery V, )([0-9.]+(?=V))/;
+            var temperatureRegex = /[-]*[0-9.]+(?=F)/;
+            var turbVRegex = /(?:Turbine V, )([0-9.]+(?=V))/;
+            var pressureRegex = /[0-9.]+(?=PSI)/;
+            var rpmRegex = /[0-9.]+(?=RPM)/;
+            var threeVoltRegex = /(?:3.3 Rail V, )([0-9.]+(?=V))/;
+            var fiveVoltRegex = /(?:5.0 Rail V, )([0-9.]+(?=V))/;
+            var zeroX100 = /(?:Pressure = )([0-9]+)/;
             //We systematically regex check the values to see if it corresponds to a type
             function pushMatches(regex,date,string,graphName,dataset){
                 var match = regex.exec(string);
                 if(match!==null){
                     typegraph = graphName;
-                    dataset.push(([date,parseFloat(match[0])]));
+                    if(graphName === "temperature" || graphName === "pressure" || graphName === "rpm"){
+                        dataset.push(([date,parseFloat(match[0])]));
+                    }else {
+                        dataset.push(([date, parseFloat(match[1])]));
+                    }
                 }
             }
             if(typegraph === ""){
@@ -316,7 +320,7 @@ function addTable(etd) {
                 pushMatches(rpmRegex,date,values[3],"rpm",rpmData);
                 pushMatches(threeVoltRegex,date,values[3],"threeVoltRail",threeVoltRailData);
                 pushMatches(fiveVoltRegex,date,values[3],"fiveVoltRail",fiveVoltRailData);
-                pushMatches(zeroX100,date,values[3],"pressure",pressureData);
+                pushMatches(zeroX100,date,values[3],"pressure2",pressureData);
             }else if(typegraph ==="battery1"){
                 pushMatches(batteryRegex,date,values[3],"battery1",batteryData);
             }else if(typegraph === "battery2"){
@@ -334,6 +338,8 @@ function addTable(etd) {
                 pushMatches(threeVoltRegex,date,values[3],"threeVoltRail",threeVoltRailData);
             }else if(typegraph === "fiveVoltRail"){
                 pushMatches(fiveVoltRegex,date,values[3],"fiveVoltRail",fiveVoltRailData);
+            }else if(typegraph === "pressure2"){
+                pushMatches(zeroX100,date,values[3],"pressure2",pressureData);
             }
             row.appendChild(td1);
             row.appendChild(td2);
@@ -365,6 +371,12 @@ function addTable(etd) {
         }
         if(pressureData[0] !== null) {
             if (typegraph === "pressure") {
+                graphSet.push(makegraph(pressureData,"Pressure over Time","purple","PSI",hexDropdownContent,hexButton));
+                showDataButton.setAttribute("style","background-color:purple;")
+            }
+        }
+        if(pressureData[0] !== null) {
+            if (typegraph === "pressure2") {
                 graphSet.push(makegraph(pressureData,"Pressure over Time","purple","PSI",hexDropdownContent,hexButton));
                 showDataButton.setAttribute("style","background-color:purple;")
             }
@@ -708,12 +720,17 @@ inputed.setAttribute("value","0x11A-extra");
 inputedLabel.setAttribute("for","0x11A-extra");
 inputedLabel.innerHTML = "Use EOT Transmit Data? Warning: Much more points, slower load times";
 //appending children
+if(document.getElementById("0x11A").checked){
+    insertAfter(insertedelement,document.getElementById("0x11A-checkbox-div"));
+}
 insertedelement.appendChild(inputed);
 insertedelement.appendChild(inputedLabel);
 //adding action listeners
 document.getElementById("0x11A").addEventListener("click", function (){
     if(document.getElementById("0x11A-extra-checkbox-div") === null){
-        insertAfter(insertedelement,document.getElementById("0x11A-checkbox-div"));
+        if(document.getElementById("0x11A").checked){
+            insertAfter(insertedelement,document.getElementById("0x11A-checkbox-div"));
+        }
     }
     else{
         var element = document.getElementById("0x11A-extra-checkbox-div");
