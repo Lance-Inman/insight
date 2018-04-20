@@ -546,7 +546,7 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
         obj.id = id.match(/[0-9]{1,5}/)[0];
         obj.firmware = firmware.match(/[0-9]+.[0-9]+/)[0];
         obj.cpld = cpld.match(/[0-9]+.[0-9]+/)[0];
-        obj.sn = sn.match(/(?:Processor Board Serial Number: |\G)([A-Za-z0-9 ]+)/)[1];
+        obj.sn = sn.match(/(?:Processor Board Serial Number: |\G)(\-*[A-Za-z0-9 ]+)/)[1];
         obj.customer = customer.match(/(?:Customer ID: |\G)([A-Z]+)/)[0];
         obj.turbine_time = turbine_time.match(/(?:Turbine Time: |\G)([0-9]+.[0-9]+)/)[0];
         obj.battery_time = battery_time.match(/(?:Battery Time: |\G)([0-9]+.[0-9]+)/)[0];
