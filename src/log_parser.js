@@ -74,27 +74,6 @@ function merge (left, right) {
 }
 //If you pass in a string of the hex code it will return what the hex code means in plain english
 function hexToText(hex){
-    if(hex === "0x114"){
-        return "Battery Voltage";
-    }
-    if(hex === "0x115"){
-        return "Turbine Voltage";
-    }
-    if(hex === "0x11A"){
-        return "Pressure Info";
-    }
-    if(hex === "0x11B"){
-        return "RPM";
-    }
-    if(hex === "0x10A"){
-        return "Board Temp";
-    }
-    if(hex === "0x100"){
-        return "0x100 Pressure Data";
-    }
-    if(hex === "0x120"){
-        return "EOT Receive";
-    }
     if(hex === "0x1"){
         return "Real Time Clock Not Set";
     }
@@ -102,7 +81,7 @@ function hexToText(hex){
         return "Micro SD Card Not Installed";
     }
     if(hex === "0x3"){
-        return "Brake Solenoid Not Detected";
+        return "Brake Solenoid Not Connected";
     }
     if(hex === "0x4"){
         return "Pressure Transducer Not Connected";
@@ -111,19 +90,19 @@ function hexToText(hex){
         return "HVM Failure";
     }
     if(hex === "0x6"){
-        return "GPS Not Detected";
+        return "GPS Not Connected That Should Be";
     }
     if(hex === "0x7"){
-        return "Accelerometer Not Present";
+        return "LIS302 Accelerometer Not Present Led Code";
     }
     if(hex === "0x8"){
         return "Real Time Clock Not Functioning";
     }
     if(hex === "0x9"){
-        return "Display Failure";
+        return "HDSP2502 Display Failure";
     }
     if(hex === "0xA"){
-        return "Temp Sensor Not Present";
+        return "LM74CIM Temp Sensor Not Present";
     }
     if(hex === "0xB"){
         return "Voltage 3.3 Out Of Tolerance";
@@ -150,32 +129,210 @@ function hexToText(hex){
         return "Turbine Voltage Out Of Spec VS RPM";
     }
     if(hex === "0x13"){
-        return "Modem Not Present";
+        return "CMX469 Modem Not Present";
     }
     if(hex === "0x14"){
         return "Charger Failure";
     }
     if(hex === "0x15"){
-        return "Radio Failure";
+        return "Radio Not Connected";
     }
     if(hex === "0x16"){
         return "CPLD Not Present or Not Programmed";
     }
-    if(hex === "0x12E"){
-        return "Over Pressure Event";
-    }
     if(hex === "0x17"){
-        return "SD Card Corrupted";
+        return "Micro SD Card Corrupted";
     }
     if(hex === "0x1D") {
-        return "12 Voltage out of Tolerance";
+        return "12.0 Voltage out of Tolerance";
+    }
+    if(hex === "0x100"){
+        return "0x100 Pressure Data";
+    }
+    if(hex === "0x101"){
+        return "Power On From Sleep Event"
+    }
+    if(hex === "0x102"){
+        return "Power On From Reset Event"
+    }
+    if(hex === "0x103"){
+        return "Power Down From Battery Low Event"
+    }
+    if(hex === "0x104"){
+        return "Power Down From Layed On Side Event"
+    }
+    if(hex === "0x105"){
+        return "E Brake Blow From Two Perfect Packets Event"
+    }
+    if(hex === "0x106"){
+        return "E Brake Blow From One Perfect And One Corrected Packet Event"
+    }
+    if(hex === "0x107"){
+        return "E Brake Blow From One Perfect Packet Event"
+    }
+    if(hex === "0x108"){
+        return "E Brake Blow From Two Corrected Packets Event"
+    }
+    if(hex === "0x109"){
+        return "E Brake Blow From One Corrected Packet Event"
+    }
+    if(hex === "0x10A"){
+        return "Temperature Info Event";
+    }
+    if(hex === "0x10B"){
+        return "External Charger Plugged In Event"
+    }
+    if(hex === "0x10C"){
+        return "Kickstart Circuit Activated Event"
+    }
+    if(hex === "0x10D"){
+        return "ETD Entered Bench Mode Event"
+    }
+    if(hex === "0x10E"){
+        return "ETD Plugged into RS232 Event"
+    }
+    if(hex === "0x10F"){
+        return "Turbine Beyond 10000 RPM Event"
+    }
+    if(hex === "0x110"){
+        return "Good Received Packet Event"
+    }
+    if(hex === "0x111"){
+        return "In Motion Event"
+    }
+    if(hex === "0x8111") {
+        return "Motion Went Away Event"
+    }
+    if(hex === "0x112"){
+        return "Marker Turning On Event"
+    }
+    if(hex === "0x113"){
+        return "Arm Request Event"
+    }
+    if(hex === "0x114"){
+        return "Battery Voltage Info Event"
+    }
+    if(hex === "0x115"){
+        return "Turbine Voltage Info Event"
+    }
+    if(hex === "0x116"){
+        return "Follow Up Data Event"
+    }
+    if(hex === "0x117"){
+        return "Power Down From Button Hold Event"
+    }
+    if(hex === "0x118"){
+        return "Charge Completion Event"
+    }
+    if(hex === "0x119"){
+        return "Power On From Watchdog Reset Event"
+    }
+    if(hex === "0x11A"){
+        return "Pressure Info Event";
+    }
+    if(hex === "0x11B"){
+        return "RPM Info Event";
+    }
+    if(hex === "0x11C"){
+        return "Power Down From No Air Event"
+    }
+    if(hex === "0x11D"){
+        return "Power Down From Charger Unplugged Event"
+    }
+    if(hex === "0x11E"){
+        return "Coordinate Info Event"
+    }
+    if(hex === "0x11F"){
+        return "GPS Doesn't See Satellite"
+    }
+    if(hex === "0x120"){
+        return "Radio Receive Event"
+    }
+    if(hex === "0x121"){
+        return "Radio Power level Set Too High"
+    }
+    if(hex === "0x122"){
+        return "Power Down From RTC GPS Update Event"
+    }
+    if(hex === "0x123"){
+        return "Power Down From Unit Disable"
+    }
+    if(hex === "0x124"){
+        return "Turbine Hours Cleared Event"
+    }
+    if(hex === "0x125"){
+        return "Battery Hours Cleared Event"
+    }
+    if(hex === "0x126"){
+        return "Location Update Sent In Event"
+    }
+    if(hex === "0x127"){
+        return "RTC Updated From GPS Time Event"
+    }
+    if(hex === "0x128"){
+        return "Radio Power Enabled Event"
+    }
+    if(hex === "0x129"){
+        return "GPS Power Enabled Event"
+    }
+    if(hex === "0x12A"){
+        return "Energy Conservation Mode Event"
+    }
+    if(hex === "0x12B"){
+        return "Location Update Failed Event"
+    }
+    if(hex === "0x12C"){
+        return "Accelerometer Info Event"
+    }
+    if(hex === "0x12D"){
+        return "Radio Power Disabled Event"
+    }
+    if(hex === "0x12E"){
+        return "Over PSI Event"
+    }
+    if(hex === "0x12F"){
+        return "Emergency Dump Battery Load test Results Event"
+    }
+    if(hex === "0x130"){
+        return "Charger Shutdown From Over Temperature PCB Event"
+    }
+    if(hex === "0x131"){
+        return "Energy Conservation Enable Reason"
+    }
+    if(hex === "0x132"){
+        return "Energy Conservation Disable Reason"
+    }
+    if(hex === "0x133"){
+        return "GPS Cell Info Event"
+    }
+    if(hex === "0x134"){
+        return "Turbine Shutoff Event"
+    }
+    if(hex === "0x135"){
+        return "Arm Button Pressed Event"
+    }
+    if(hex === "0x136"){
+        return "Battery Voltage Dropped Too Far After Charge Disable"
+    }
+    if(hex === "0x137"){
+        return "Battery Voltage Started Too High"
     }
     if(hex === "0x138"){
-        return "3.3 Rail Voltage";
+        return "3.3 Rail Voltage Info Event";
     }
     if(hex === "0x139"){
-        return "5.0 Rail Voltage";
+        return "5.0 Rail Voltage Info Event";
     }
+    if(hex === "0x13A"){
+        return "GPS Detected Event"
+    }
+    if(hex === "0x13B"){
+        return "Abuse Detected Freefall Event"
+    }
+    if(hex === "0x13C"){
+        return "Abuse Detected High Impact Event"
+    }
+    return null
 }
 
 function addTable(etd) {
@@ -212,7 +369,11 @@ function addTable(etd) {
         var hexDropdown = document.createElement("div");
         hexDropdown.setAttribute("class", "hex-dropdown");
         var hexButton = document.createElement("button");
-        hexButton.appendChild(document.createTextNode(hexToText(tracked_code.code)+": "+tracked_code.logs.length));
+        if(hexToText(tracked_code.code) == null){
+            hexButton.appendChild(document.createTextNode(tracked_code.code+": "+tracked_code.logs.length));
+        }else{
+            hexButton.appendChild(document.createTextNode(hexToText(tracked_code.code)+": "+tracked_code.logs.length));
+        }
         hexButton.setAttribute("onclick", ("toggleDropdown(\""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num)+"-graph" +"\")"));
         hexButton.setAttribute("class", "hex-dropdown-trigger");
         var hexDropdownContent = document.createElement("div");
