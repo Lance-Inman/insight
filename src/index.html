@@ -32,25 +32,25 @@
     <div class="options-dropdown-content show" id="options-dropdown-content">
         <div class="column">
             <div class="custom-hex-input"><input type="text" name="custom" id="custom-hex-input" placeholder="Custom ex: &quot;0x1, 0x3&quot;"></div>
-            <div><input type="checkbox" name="hex-code" id="critical" value="critical" checked>
+            <div><input type="checkbox" name="hex-code" id="critical" value="critical" checked autocomplete="off">
                 <label for="critical">Critical Errors (0x1-0x17, 0x1D, 0x12E)</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x10A" value="0x10A" checked>
+            <div><input type="checkbox" name="hex-code" id="0x10A" value="0x10A" autocomplete="off" >
                 <label for="0x10A">0x10A: Board Temp</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x114" value="0x114">
+            <div><input type="checkbox" name="hex-code" id="0x114" value="0x114" autocomplete="off">
                 <label for="0x114">0x114: Battery V</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x115" value="0x115">
+            <div><input type="checkbox" name="hex-code" id="0x115" value="0x115" autocomplete="off">
                 <label for="0x115">0x115: Turbine V</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x11A" value="0x11A">
+            <div id="0x11A-checkbox-div"><input type="checkbox" name="hex-code" id="0x11A" value="0x11A" autocomplete="off">
                 <label for="0x11A">0x11A: Pressure Info</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x11B" value="0x11B">
+            <div><input type="checkbox" name="hex-code" id="0x11B" value="0x11B" autocomplete="off">
                 <label for="0x11B">0x11B: RPM</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x100" value="0x100">
+            <div><input type="checkbox" name="hex-code" id="0x100" value="0x100" autocomplete="off">
                 <label for="0x100">0x100: EOT Transmit</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x120" value="0x120">
+            <div><input type="checkbox" name="hex-code" id="0x120" value="0x120" autocomplete="off">
                 <label for="0x120">0x120: EOT Receive</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x138" value="0x138">
+            <div><input type="checkbox" name="hex-code" id="0x138" value="0x138" autocomplete="off">
                 <label for="0x138">0x138: 3.3 Rail Voltage</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x139" value="0x139">
+            <div><input type="checkbox" name="hex-code" id="0x139" value="0x139" autocomplete="off">
                 <label for="0x139">0x139: 5.0 Rail Voltage</label></div>
             <button id="reparse">Reparse files</button>
         </div>

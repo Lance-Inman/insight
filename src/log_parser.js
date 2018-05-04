@@ -90,7 +90,7 @@ function hexToText(hex){
         return "Board Temp";
     }
     if(hex === "0x100"){
-        return "EOT Transmit";
+        return "0x100 Pressure Data";
     }
     if(hex === "0x120"){
         return "EOT Receive";
@@ -105,7 +105,7 @@ function hexToText(hex){
         return "Brake Solenoid Not Detected";
     }
     if(hex === "0x4"){
-        return "Pressure Transducer Failure";
+        return "Pressure Transducer Not Connected";
     }
     if(hex === "0x5"){
         return "HVM Failure";
@@ -114,7 +114,7 @@ function hexToText(hex){
         return "GPS Not Detected";
     }
     if(hex === "0x7"){
-        return "Accelerometer Failure";
+        return "Accelerometer Not Present";
     }
     if(hex === "0x8"){
         return "Real Time Clock Not Functioning";
@@ -123,7 +123,7 @@ function hexToText(hex){
         return "Display Failure";
     }
     if(hex === "0xA"){
-        return "Temp Sensor Failure";
+        return "Temp Sensor Not Present";
     }
     if(hex === "0xB"){
         return "Voltage 3.3 Out Of Tolerance";
@@ -135,7 +135,7 @@ function hexToText(hex){
         return "Voltage 12.0 Out Of Tolerance";
     }
     if(hex === "0xE"){
-        return "Brake Solenoid Failed During Dump";
+        return "Brake Solenoid Failed During Blow";
     }
     if(hex === "0xF"){
         return "Turbine Not Spinning";
@@ -147,7 +147,7 @@ function hexToText(hex){
         return "Turbine RPM Out Of Spec VS Pressure";
     }
     if(hex === "0x12"){
-        return "Turbine Voltage Out Of Spec VS Pressure";
+        return "Turbine Voltage Out Of Spec VS RPM";
     }
     if(hex === "0x13"){
         return "Modem Not Present";
@@ -159,16 +159,16 @@ function hexToText(hex){
         return "Radio Failure";
     }
     if(hex === "0x16"){
-        return "CPLD Electronic Memory Loss";
+        return "CPLD Not Present or Not Programmed";
     }
     if(hex === "0x12E"){
-        return "GPS Power Disabled";
+        return "Over Pressure Event";
     }
     if(hex === "0x17"){
-        return "0x17";
+        return "SD Card Corrupted";
     }
     if(hex === "0x1D") {
-        return "0x1D";
+        return "12 Voltage out of Tolerance";
     }
     if(hex === "0x138"){
         return "3.3 Rail Voltage";
@@ -191,13 +191,13 @@ function addTable(etd) {
     etdDropdownContent.setAttribute("class", "etd-dropdown-content");
     etdDropdown.appendChild(etdButton);
     //Graphing assigning variables
-    const tempData = [];
-    const batteryData = [];
-    const turbVData = [];
-    const pressureData = [];
-    const rpmData = [];
-    const fiveVoltRailData = [];
-    const threeVoltRailData = [];
+    var tempData = [];
+    var batteryData = [];
+    var turbVData = [];
+    var pressureData = [];
+    var rpmData = [];
+    var fiveVoltRailData = [];
+    var threeVoltRailData = [];
     var graphSet = [];
     // For each hex code tracked by the etd
     var isEmpty = true;
@@ -267,15 +267,13 @@ function addTable(etd) {
             /*we start with the regex commands which need to be unique to each
               set of data so that we don't have overlapping matching, hence the
               Info, and Battery V, for batteryRegex and batteryRegex2 (the
-              reason for the two regexes is because our log files changes)
-              We then check for matches and cutout the unneeded text using the
-              substring method, while adding it to our data section
+              reason for the two regexes is because our log files changed)
             */
             //Date Formatting
-            var yearRegex = /[0-9]{4}/g;
-            var monthRegex = /[a-zA-Z]+/g;
-            var dayRegex = /^[0-9]{1,2}/g;
-            var timeRegex = /[0-9]{2}:[0-9]{2}:[0-9]{2}/g;
+            var yearRegex = /[0-9]{4}/;
+            var monthRegex = /[a-zA-Z]+/;
+            var dayRegex = /^[0-9]{1,2}/;
+            var timeRegex = /[0-9]{2}:[0-9]{2}:[0-9]{2}/;
             var yearRegexMatch = yearRegex.exec(values[0]);
             var monthRegexmatch = monthRegex.exec(values[0]);
             var dayRegexmatch = dayRegex.exec(values[0]);
@@ -292,20 +290,25 @@ function addTable(etd) {
                 console.log(values);
                 continue;
             }
-            var batteryRegex = /(?<=Info, )[0-9.]+(?=V)/g;
-            var batteryRegex2 = /(?<=Battery V, )[0-9.]+(?=V)/g;
-            var temperatureRegex = /[-]*[0-9.]+(?=F)/g;
-            var turbVRegex = /(?<=Turbine V, )[0-9.]+(?=V)/g;
-            var pressureRegex = /[0-9.]+(?=PSI)/g;
-            var rpmRegex = /[0-9.]+(?=RPM)/g;
-            var threeVoltRegex = /(?<=3.3 Rail V, )[0-9.]+(?=V)/;
-            var fiveVoltRegex = /(?<=5.0 Rail V, )[0-9.]+(?=V)/;
+            var batteryRegex = /(?:Info, )([0-9.]+(?=V))/;
+            var batteryRegex2 = /(?:Battery V, )([0-9.]+(?=V))/;
+            var temperatureRegex = /[-]*[0-9.]+(?=F)/;
+            var turbVRegex = /(?:Turbine V, )([0-9.]+(?=V))/;
+            var pressureRegex = /[0-9.]+(?=PSI)/;
+            var rpmRegex = /[0-9.]+(?=RPM)/;
+            var threeVoltRegex = /(?:3.3 Rail V, )([0-9.]+(?=V))/;
+            var fiveVoltRegex = /(?:5.0 Rail V, )([0-9.]+(?=V))/;
+            var zeroX100 = /(?:Pressure = )([0-9]+)/;
             //We systematically regex check the values to see if it corresponds to a type
             function pushMatches(regex,date,string,graphName,dataset){
                 var match = regex.exec(string);
                 if(match!==null){
                     typegraph = graphName;
-                    dataset.push(([date,parseFloat(match[0])]));
+                    if(graphName === "temperature" || graphName === "pressure" || graphName === "rpm"){
+                        dataset.push(([date,parseFloat(match[0])]));
+                    }else {
+                        dataset.push(([date, parseFloat(match[1])]));
+                    }
                 }
             }
             if(typegraph === ""){
@@ -317,6 +320,7 @@ function addTable(etd) {
                 pushMatches(rpmRegex,date,values[3],"rpm",rpmData);
                 pushMatches(threeVoltRegex,date,values[3],"threeVoltRail",threeVoltRailData);
                 pushMatches(fiveVoltRegex,date,values[3],"fiveVoltRail",fiveVoltRailData);
+                pushMatches(zeroX100,date,values[3],"pressure2",pressureData);
             }else if(typegraph ==="battery1"){
                 pushMatches(batteryRegex,date,values[3],"battery1",batteryData);
             }else if(typegraph === "battery2"){
@@ -327,12 +331,15 @@ function addTable(etd) {
                 pushMatches(turbVRegex,date,values[3],"turbineVoltage",turbVData);
             }else if(typegraph === "pressure"){
                 pushMatches(pressureRegex,date,values[3],"pressure",pressureData);
+                pushMatches(zeroX100,date,values[3],"pressure",pressureData);
             }else if(typegraph === "rpm"){
                 pushMatches(rpmRegex,date,values[3],"rpm",rpmData);
             }else if(typegraph === "threeVoltRail"){
                 pushMatches(threeVoltRegex,date,values[3],"threeVoltRail",threeVoltRailData);
             }else if(typegraph === "fiveVoltRail"){
                 pushMatches(fiveVoltRegex,date,values[3],"fiveVoltRail",fiveVoltRailData);
+            }else if(typegraph === "pressure2"){
+                pushMatches(zeroX100,date,values[3],"pressure2",pressureData);
             }
             row.appendChild(td1);
             row.appendChild(td2);
@@ -368,6 +375,12 @@ function addTable(etd) {
                 showDataButton.setAttribute("style","background-color:purple;")
             }
         }
+        if(pressureData[0] !== null) {
+            if (typegraph === "pressure2") {
+                graphSet.push(makegraph(pressureData,"Pressure over Time","purple","PSI",hexDropdownContent,hexButton));
+                showDataButton.setAttribute("style","background-color:purple;")
+            }
+        }
         if(rpmData[0] !== null){
             if(typegraph === "rpm"){
                 graphSet.push(makegraph(rpmData,"Rotations per minute","orange","RPM",hexDropdownContent,hexButton));
@@ -386,6 +399,14 @@ function addTable(etd) {
                 showDataButton.setAttribute("style","background-color:grey;")
             }
         }
+        //reassigning data back to nothing, as the graph was already made
+        tempData = [];
+        batteryData = [];
+        turbVData = [];
+        pressureData = [];
+        rpmData = [];
+        fiveVoltRailData = [];
+        threeVoltRailData = [];
         if(graphable){
             hexDropdownContent.appendChild(showDataButton);
             dataDropDownContent.appendChild(table);
@@ -462,6 +483,9 @@ function isGraphable(hex){
     if(hex === "0x139"){
         return true
     }
+    if(hex === "0x100"){
+        return true
+    }
     return false;
 }
 //Changes month passed properly (Such as January with a capital J) to a value coresponding to that month like 01
@@ -518,25 +542,21 @@ function createTrackedCode(code) {
 
 function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_time) {
     var obj = {};
-
     try {
         obj.id = id.match(/[0-9]{1,5}/)[0];
         obj.firmware = firmware.match(/[0-9]+.[0-9]+/)[0];
         obj.cpld = cpld.match(/[0-9]+.[0-9]+/)[0];
-        obj.sn = sn.match(/(?:Processor Board Serial Number: |\G)([A-Za-z0-9 ]+)/)[1];
+        obj.sn = sn.match(/(?:Processor Board Serial Number: |\G)(\-*[A-Za-z0-9 ]+)/)[1];
         obj.customer = customer.match(/(?:Customer ID: |\G)([A-Z]+)/)[0];
         obj.turbine_time = turbine_time.match(/(?:Turbine Time: |\G)([0-9]+.[0-9]+)/)[0];
         obj.battery_time = battery_time.match(/(?:Battery Time: |\G)([0-9]+.[0-9]+)/)[0];
     } catch (err) {
         return null;
     }
-
     obj.tracked_codes = [];
-
     obj.addCode = function(code) {
         this.tracked_codes.push(createTrackedCode(code));
     };
-
     obj.parse = function(line) {
         var values = line.split('\t');
         var code = values[2];
@@ -547,14 +567,12 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
             }
         }
     };
-
     obj.test = function() {
         console.log('tracked_codes.length: ');
         console.log(this.tracked_codes.length);
         console.log('logs.length');
         console.log(this.tracked_codes[0].logs.length);
     };
-
     obj.print = function() {
         console.log("ID: " + this.id);
         console.log("Firmware: " + this.firmware);
@@ -566,22 +584,18 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
             }
         }
     };
-
     return obj;
 }
-
 function parseETDFile(reader, etd_list) {
     if(!etd_list) {
         etd_list = [];
     }
-
     var lines = reader.result.split("\n");
     var line;
     var this_etd;
     for (var line_num = 0; line_num < lines.length-1; line_num++) {
         try {
             line = lines[line_num];
-
             // If a log header is found
             if (line.charAt(0) === "-" && (line_num + 7 < lines.length) && lines[line_num + 1].charAt(0) === 'E') {
                 // Parse the header
@@ -598,12 +612,10 @@ function parseETDFile(reader, etd_list) {
                 var new_etd = createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_time);
                 // If the etd initialized successfully
                 if (new_etd) {
-
                     // Scan existing ETDs for a match with the new ETD
                     var match_found = false;
                     for (var etd_num = 0; etd_num < etd_list.length; etd_num++) {
                         var existing_etd = etd_list[etd_num];
-
                         // If a match is found, set the existing ETD at this_etd
                         if (new_etd.id === existing_etd.id
                             && new_etd.firmware === existing_etd.firmware
@@ -615,7 +627,6 @@ function parseETDFile(reader, etd_list) {
                             break;
                         }
                     }
-
                     // If an existing ETD could not be found, set the new ETD as this_etd
                     if (match_found === false) {
                         etd_list.push(new_etd);
@@ -650,13 +661,14 @@ function loadOptions(etd) {
         etd.addCode("0x115");
     }
     if(document.querySelector('input[value="0x11A"]').checked) {
-        etd.addCode("0x11A");
+        if(document.querySelector('input[value="0x11A-extra"]').checked) {
+            etd.addCode("0x100");
+        }else{
+            etd.addCode("0x11A");
+        }
     }
     if(document.querySelector('input[value="0x11B"]').checked) {
         etd.addCode("0x11B");
-    }
-    if(document.querySelector('input[value="0x100"]').checked) {
-        etd.addCode("0x100");
     }
     if(document.querySelector('input[value="0x120"]').checked) {
         etd.addCode("0x120");
@@ -694,7 +706,42 @@ function loadOptions(etd) {
         etd.addCode("0x12E");
     }
 }
-
+//--------------------Creating extra element on 0x11A------------------------//
+var insertedelement = document.createElement("div");
+var inputed = document.createElement("input");
+var inputedLabel = document.createElement("label");
+//adding attributes to elements
+insertedelement.setAttribute("id","0x11A-extra-checkbox-div");
+insertedelement.setAttribute("style","margin-left:20px;margin-bottom:5px;");
+inputed.setAttribute("type","checkbox");
+inputed.setAttribute("name","hex-code");
+inputed.setAttribute("id","0x11A-extra");
+inputed.setAttribute("value","0x11A-extra");
+inputedLabel.setAttribute("for","0x11A-extra");
+inputedLabel.innerHTML = "Use EOT Transmit Data? Warning: Much more points, slower load times";
+//appending children
+if(document.getElementById("0x11A").checked){
+    insertAfter(insertedelement,document.getElementById("0x11A-checkbox-div"));
+}
+insertedelement.appendChild(inputed);
+insertedelement.appendChild(inputedLabel);
+//adding action listeners
+document.getElementById("0x11A").addEventListener("click", function (){
+    if(document.getElementById("0x11A-extra-checkbox-div") === null){
+        if(document.getElementById("0x11A").checked){
+            insertAfter(insertedelement,document.getElementById("0x11A-checkbox-div"));
+        }
+    }
+    else{
+        var element = document.getElementById("0x11A-extra-checkbox-div");
+        element.parentNode.removeChild(element);
+    }
+});
+//----------------------------------End--------------------------------------//
+//function to insert am element after the reference
+function insertAfter(newNode, referenceNode) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
 function chronCompare(a, b) {
     a = a.name;
     b = b.name;
@@ -710,8 +757,6 @@ function chronCompare(a, b) {
             return 1;
         }
     }
-
-
     var aMonth = a.match(/(?:[0-9]+|\G)([A-Z]+)/);
     var bMonth = b.match(/(?:[0-9]+|\G)([A-Z]+)/);
     if (aMonth && bMonth) {
@@ -732,7 +777,6 @@ function chronCompare(a, b) {
             }
         }
     }
-
     var aDay = parseInt(a.match(/[0-9]+/));
     var bDay = parseInt(b.match(/[0-9]+/));
     if (aDay < bDay) {
