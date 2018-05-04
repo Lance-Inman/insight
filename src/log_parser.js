@@ -807,7 +807,6 @@ function parseETDFile(reader, etd_list) {
 
 function loadOptions(etd) {
     if(document.getElementById("custom-hex-input").value) {
-        var codes = document.getElementById("custom-hex-input").value.split(", ");
         var codes = document.getElementById("custom-hex-input").value;
         codes = codes.replace("\"",'');
         codes = codes.replace(" ",'');
