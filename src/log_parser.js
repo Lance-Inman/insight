@@ -412,6 +412,7 @@ function addTable(etd) {
         header.appendChild(td3);
         header.appendChild(td4);
         table.appendChild(header);
+        var lastdate;
         // For each log of the tracked code
         for(var log_num = 0; log_num < tracked_code.logs.length; log_num++) {
             // Create a table row
@@ -425,6 +426,7 @@ function addTable(etd) {
             td2.appendChild(document.createTextNode(values[1]));
             td3.appendChild(document.createTextNode(values[2]));
             td4.appendChild(document.createTextNode(values[3]));
+
             if(graphable) {
                 //-----------------------Graphing------------------------------//
                 /*we start with the regex commands which need to be unique to each
@@ -442,9 +444,10 @@ function addTable(etd) {
                 var dayRegexmatch = dayRegex.exec(values[0]);
                 var timeRegexmatch = timeRegex.exec(values[0]);
                 var month = changeMonthtoNumber(monthRegexmatch[0]);
+                var date;
                 try {
                     if (monthRegexmatch[0] !== null && dayRegexmatch[0] !== null && timeRegexmatch[0] !== null && yearRegexMatch[0]) {
-                        var date = new Date(yearRegexMatch[0] + "/" + month + "/" + dayRegexmatch[0] + " " + timeRegexmatch);
+                        date = new Date(yearRegexMatch[0] + "/" + month + "/" + dayRegexmatch[0] + " " + timeRegexmatch);
                     } else {
                         console.log(values);
                     }
@@ -453,6 +456,12 @@ function addTable(etd) {
                     console.log(values);
                     continue;
                 }
+                if(lastdate !== null){
+                    if(lastdate.value < date.value){
+                        document.getElementById("errorMessage").setAttribute("style","display:inherit")
+                    }
+                }
+                lastdate = date;
                 var batteryRegex = /(?:Info, )([0-9.]+(?=V))/;
                 var batteryRegex2 = /(?:Battery V, )([0-9.]+(?=V))/;
                 var temperatureRegex = /[-]*[0-9.]+(?=F)/;
