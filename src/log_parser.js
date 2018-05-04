@@ -808,6 +808,10 @@ function parseETDFile(reader, etd_list) {
 function loadOptions(etd) {
     if(document.getElementById("custom-hex-input").value) {
         var codes = document.getElementById("custom-hex-input").value.split(", ");
+        var codes = document.getElementById("custom-hex-input").value;
+        codes = codes.replace("\"",'');
+        codes = codes.replace(" ",'');
+        codes = codes.split(',');
         for(var i = 0; i < codes.length; i++) {
             etd.addCode(codes[i]);
         }
