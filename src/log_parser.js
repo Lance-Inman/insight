@@ -42,7 +42,7 @@ function readFiles(files) {
     reader.onloadend =
         function () {
         };
-
+    document.getElementById("errorMessage").setAttribute("style","display:none");
     if (files.length > 0) {
         document.getElementById("status").innerHTML = "Loading files...";
         files = [].slice.call(files).sort(chronCompare);
@@ -371,7 +371,7 @@ function addTable(etd) {
         var hexDropdown = document.createElement("div");
         hexDropdown.setAttribute("class", "hex-dropdown");
         var hexButton = document.createElement("button");
-        if(hexToText(tracked_code.code) == null){
+        if(hexToText(tracked_code.code) === null){
             hexButton.appendChild(document.createTextNode(tracked_code.code+": "+tracked_code.logs.length));
         }else{
             hexButton.appendChild(document.createTextNode(hexToText(tracked_code.code)+": "+tracked_code.logs.length));
@@ -412,7 +412,8 @@ function addTable(etd) {
         header.appendChild(td3);
         header.appendChild(td4);
         table.appendChild(header);
-        var lastdate;
+        var lastDate = new Date();
+        lastDate.setYear(100);
         // For each log of the tracked code
         for(var log_num = 0; log_num < tracked_code.logs.length; log_num++) {
             // Create a table row
@@ -448,6 +449,12 @@ function addTable(etd) {
                 try {
                     if (monthRegexmatch[0] !== null && dayRegexmatch[0] !== null && timeRegexmatch[0] !== null && yearRegexMatch[0]) {
                         date = new Date(yearRegexMatch[0] + "/" + month + "/" + dayRegexmatch[0] + " " + timeRegexmatch);
+                        if(lastDate !== null){
+                            //Added an offeset of 6 hours for the time to be off, this prevents very small errors from showing the message
+                            if(lastDate.getTime() > (date.getTime() + 2.16e+7)){
+                                document.getElementById("errorMessage").setAttribute("style","display:inherit");
+                            }
+                        }
                     } else {
                         console.log(values);
                     }
@@ -456,12 +463,7 @@ function addTable(etd) {
                     console.log(values);
                     continue;
                 }
-                if(lastdate !== null){
-                    if(lastdate.value < date.value){
-                        document.getElementById("errorMessage").setAttribute("style","display:inherit")
-                    }
-                }
-                lastdate = date;
+                lastDate = date;
                 var batteryRegex = /(?:Info, )([0-9.]+(?=V))/;
                 var batteryRegex2 = /(?:Battery V, )([0-9.]+(?=V))/;
                 var temperatureRegex = /[-]*[0-9.]+(?=F)/;
