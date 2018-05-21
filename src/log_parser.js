@@ -642,7 +642,7 @@ function addTable(etd) {
                 if(typegraph === "pluggedIn"){
                     if(outOfOrder){
                         console.log("Sorting");
-                        pluggedInData = pluggedInData.sort()
+                        pluggedInData = totalHeapSort(pluggedInData);
                     }
                     graphSet.push(makegraph(pluggedInData,"Plugged in Instances","green","Instances",0,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:grey;")
