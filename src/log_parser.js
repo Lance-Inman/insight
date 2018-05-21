@@ -53,39 +53,46 @@ function readFiles(files) {
         reader.readAsText(files[0]);
     }
 }
-function mergeSort (arr) {
-    if (arr.length === 1) {
-        // return once we hit an array with a single item
-        return arr
-    }
-
-    const middle = Math.floor(arr.length / 2) // get the middle item of the array rounded down
-    const left = arr.slice(0, middle) // items on the left side
-    const right = arr.slice(middle) // items on the right side
-
-    return merge(
-        mergeSort(left),
-        mergeSort(right)
-    )
-}
-// compare the arrays item by item and return the concatenated result
-function merge (left, right) {
-    var result = [];
-    var indexLeft = 0;
-    var indexRight = 0;
-
-    while (indexLeft < left.length && indexRight < right.length) {
-        if (left[indexLeft][0] < right[indexRight][0]) {
-            result.push(left[indexLeft]);
-            indexLeft++;
-        } else {
-            result.push(right[indexRight]);
-            indexRight++;
+/* to create MAX  array */
+function totalHeapSort(input){
+    var array_length;
+    var array = input;
+    function heap_root(input, i) {
+        var left = 2 * i + 1;
+        var right = 2 * i + 2;
+        var max = i;
+        if (left < array_length && input[left][0] > input[max][0]) {
+            max = left;
+        }
+        if (right < array_length && input[right][0] > input[max][0])     {
+            max = right;
+        }
+        if (max != i) {
+            swap(input, i, max);
+            heap_root(input, max);
         }
     }
-
-    return result.concat(left.slice(indexLeft)).concat(right.slice(indexRight))
+    function swap(input, index_A, index_B) {
+        var temp = input[index_A];
+        input[index_A] = input[index_B];
+        input[index_B] = temp;
+    }
+    function heapSort(input) {
+        array_length = input.length;
+        for (var i = Math.floor(array_length / 2); i >= 0; i -= 1)      {
+            heap_root(input, i);
+        }
+        for (i = input.length - 1; i > 0; i--) {
+            swap(input, 0, i);
+            array_length--;
+            heap_root(input, 0);
+        }
+        return input
+    }
+    heapSort(array);
+    return array;
 }
+
 //If you pass in a string of the hex code it will return what the hex code means in plain english
 function hexToText(hex){
     if(hex === "0x1"){
@@ -348,22 +355,6 @@ function hexToText(hex){
     }
     return null
 }
-function insertionSort (items) {
-    console.log("Sorting elements");
-    for (var i = 0; i < items.length; i++) {
-        let value = items[i];
-        // store the current item value so it can be placed right
-        for (var j = i - 1; j > -1 && items[j][0] > value[0]; j--) {
-            // loop through the items in the sorted array (the items from the current to the beginning)
-            // copy each item to the next one
-            items[j + 1] = items[j]
-        }
-        // the last item we've reached should now hold the value of the currently sorted item
-        items[j + 1] = value
-    }
-    console.log("Items Sorted");
-    return items;
-}
 function addTable(etd) {
     // Create a dropdown panel for the etd
     var etdDropdown = document.createElement("div");
@@ -571,7 +562,7 @@ function addTable(etd) {
                 if (typegraph === "temperature") {
                     if(outOfOrder){
                         console.log("Sorting");
-                        tempData = mergeSort(tempData);
+                        tempData = totalHeapSort(tempData);
                     }
                     graphSet.push(makegraph(tempData,"Temperature over Time","red","Degrees Fahrenheit",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:red;")
@@ -581,7 +572,7 @@ function addTable(etd) {
                 if (typegraph === "turbineVoltage") {
                     if(outOfOrder){
                         console.log("Sorting");
-                        turbVData = mergeSort(turbVData);
+                        turbVData = totalHeapSort(turbVData);
                     }
                     graphSet.push(makegraph(turbVData,"Turbine voltage over time","blue","Voltage",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:blue;")
@@ -591,7 +582,7 @@ function addTable(etd) {
                 if (typegraph === "battery1" || typegraph === "battery2") {
                     if(outOfOrder){
                         console.log("Sorting");
-                        batteryData = mergeSort(batteryData);
+                        batteryData = totalHeapSort(batteryData);
                     }
                     graphSet.push(makegraph(batteryData,"Battery Voltage over Time","green","Battery Voltage",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:green;")
@@ -601,7 +592,7 @@ function addTable(etd) {
                 if (typegraph === "pressure") {
                     if(outOfOrder){
                         console.log("Sorting");
-                        pressureData = mergeSort(pressureData);
+                        pressureData = totalHeapSort(pressureData);
                     }
                     graphSet.push(makegraph(pressureData,"Pressure over Time","purple","PSI",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:purple;")
@@ -611,7 +602,7 @@ function addTable(etd) {
                 if (typegraph === "pressure2") {
                     if(outOfOrder){
                         console.log("Sorting");
-                        pressureData = mergeSort(pressureData);
+                        pressureData = totalHeapSort(pressureData);
                     }
                     graphSet.push(makegraph(pressureData,"Pressure over Time","purple","PSI",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:purple;")
@@ -621,7 +612,7 @@ function addTable(etd) {
                 if(typegraph === "rpm"){
                     if(outOfOrder){
                         console.log("Sorting");
-                         rpmData = mergeSort(rpmData);
+                        rpmData = totalHeapSort(rpmData);
                     }
                     graphSet.push(makegraph(rpmData,"Rotations per minute","orange","RPM",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:orange;")
@@ -631,7 +622,7 @@ function addTable(etd) {
                 if(typegraph === "fiveVoltRail"){
                     if(outOfOrder){
                         console.log("Sorting");
-                        threeVoltRailData = mergeSort(threeVoltRailData);
+                        threeVoltRailData = totalHeapSort(threeVoltRailData);
                     }
                     graphSet.push(makegraph(fiveVoltRailData,"5 Volt Rail Voltage","grey","Voltage",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:grey;")
@@ -641,7 +632,7 @@ function addTable(etd) {
                 if(typegraph === "threeVoltRail"){
                     if(outOfOrder){
                         console.log("Sorting");
-                        fiveVoltRailData = mergeSort(fiveVoltRailData);
+                        fiveVoltRailData = totalHeapSort(fiveVoltRailData);
                     }
                     graphSet.push(makegraph(threeVoltRailData,"3.3 Volt Rail Voltage","grey","Voltage",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:grey;")
@@ -651,7 +642,7 @@ function addTable(etd) {
                 if(typegraph === "pluggedIn"){
                     if(outOfOrder){
                         console.log("Sorting");
-                        pluggedInData = mergeSort(pluggedInData);
+                        pluggedInData = pluggedInData.sort()
                     }
                     graphSet.push(makegraph(pluggedInData,"Plugged in Instances","green","Instances",0,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:grey;")
@@ -928,15 +919,6 @@ function loadOptions(etd) {
     }
     if(document.querySelector('input[value="0x11B"]').checked) {
         etd.addCode("0x11B");
-    }
-    if(document.querySelector('input[value="0x120"]').checked) {
-        etd.addCode("0x120");
-    }
-    if(document.querySelector('input[value="0x138"]').checked) {
-        etd.addCode("0x138");
-    }
-    if(document.querySelector('input[value="0x139"]').checked) {
-        etd.addCode("0x139");
     }
     if(document.querySelector('input[value="critical"]').checked) {
         etd.addCode("0x1");
