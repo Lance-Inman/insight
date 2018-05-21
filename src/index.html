@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name=viewport content="width=device-width, initial-scale=1">
-    <title>DPS Insight V0.6</title>
+    <title>DPS Insight V1.0</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="style.css">
     <link rel="stylesheet" type="text/css" href="dygraphs/dist/dygraph.min.css">
-    <script type="text/javascript" src="dygraphs/dist/dygraph.min.js"></script>
+    <script type="text/javascript" src="dygraphs/dist/dygraph.js"></script>
     <script type="text/javascript" src="dygraphs/src/extras/synchronizer.js"></script>
 </head>
 <body>
@@ -56,9 +56,9 @@
         </div>
     </div>
     <div id="errorMessage">
-        <p>Logfiles may be corrupted, make sure firmware is up to date!</p>
+        <p>Some logs appear to be from older firmware versions, there may be new firmware available</p>
     </div>
     <div id="graphdiv" style="background-color: white;width:100%;"></div>
     <div id="results-panel"></div>
-    <script src="log_parser.js?6.0.2"></script>
+    <script src="log_parser.js?6.0.3"></script>
 </body>
