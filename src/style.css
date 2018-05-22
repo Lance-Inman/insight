@@ -181,21 +181,21 @@ table, th, td {
 th {
     font-weight: bold;
 }
+.text-center{
+    text-align: center;
+}
 #reparse {
     cursor: pointer;
     display: none;
     margin: 5px;
 }
-#errorMessage {
-    display:none;
-    opacity: 1;
-    background-color: #b1efe0;
-    padding:2px;
+#footer{
+    position: static;
+    right: 0;
+    left: 0;
+    padding: 20px;
 }
-#errorMessage p{
-    opacity:1;
-    color:#4CAF50;
-    text-align: center;
-    margin: .4%;
-    font-weight: bold;
+.footer {
+    margin: 0 auto;
+    color: grey;
 }

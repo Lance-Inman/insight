@@ -1,5 +1,6 @@
 var etd_list = [];
 var reader = new FileReader();
+var doNotSort = false;
 function readFiles(files) {
     etd_list = [];
     var index = 0;
@@ -45,7 +46,6 @@ function readFiles(files) {
     reader.onloadend =
         function () {
         };
-    document.getElementById("errorMessage").setAttribute("style","display:none");
     if (files.length > 0) {
         document.getElementById("status").innerHTML = "Loading files...";
         files = [].slice.call(files).sort(chronCompare);
@@ -473,7 +473,6 @@ function addTable(etd) {
                         if(lastDate !== null){
                             //Added an offeset of 6 hours for the time to be off, this prevents very small errors from showing the message
                             if(lastDate.getTime() > (date.getTime() + 2.16e+7)){
-                                document.getElementById("errorMessage").setAttribute("style","display:inherit");
                                 outOfOrder = true;
                                 console.log("Log content out of order");
                             }
@@ -561,8 +560,10 @@ function addTable(etd) {
             if(tempData[0] !== null) {
                 if (typegraph === "temperature") {
                     if(outOfOrder){
-                        console.log("Sorting");
-                        tempData = totalHeapSort(tempData);
+                        if(!doNotSort){
+                            console.log("Sorting");
+                            tempData = totalHeapSort(tempData);
+                        }
                     }
                     graphSet.push(makegraph(tempData,"Temperature over Time","red","Degrees Fahrenheit",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:red;")
@@ -571,8 +572,10 @@ function addTable(etd) {
             if(turbVData[0] !== null) {
                 if (typegraph === "turbineVoltage") {
                     if(outOfOrder){
-                        console.log("Sorting");
-                        turbVData = totalHeapSort(turbVData);
+                        if(!doNotSort){
+                            console.log("Sorting");
+                            turbVData = totalHeapSort(turbVData);
+                        }
                     }
                     graphSet.push(makegraph(turbVData,"Turbine voltage over time","blue","Voltage",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:blue;")
@@ -581,8 +584,10 @@ function addTable(etd) {
             if(batteryData[0] !== null) {
                 if (typegraph === "battery1" || typegraph === "battery2") {
                     if(outOfOrder){
-                        console.log("Sorting");
-                        batteryData = totalHeapSort(batteryData);
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            batteryData = totalHeapSort(batteryData);
+                        }
                     }
                     graphSet.push(makegraph(batteryData,"Battery Voltage over Time","green","Battery Voltage",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:green;")
@@ -591,8 +596,10 @@ function addTable(etd) {
             if(pressureData[0] !== null) {
                 if (typegraph === "pressure") {
                     if(outOfOrder){
-                        console.log("Sorting");
-                        pressureData = totalHeapSort(pressureData);
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            pressureData = totalHeapSort(pressureData);
+                        }
                     }
                     graphSet.push(makegraph(pressureData,"Pressure over Time","purple","PSI",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:purple;")
@@ -601,8 +608,10 @@ function addTable(etd) {
             if(pressureData[0] !== null) {
                 if (typegraph === "pressure2") {
                     if(outOfOrder){
-                        console.log("Sorting");
-                        pressureData = totalHeapSort(pressureData);
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            pressureData = totalHeapSort(pressureData);
+                        }
                     }
                     graphSet.push(makegraph(pressureData,"Pressure over Time","purple","PSI",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:purple;")
@@ -611,8 +620,10 @@ function addTable(etd) {
             if(rpmData[0] !== null){
                 if(typegraph === "rpm"){
                     if(outOfOrder){
-                        console.log("Sorting");
-                        rpmData = totalHeapSort(rpmData);
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            rpmData = totalHeapSort(rpmData);
+                        }
                     }
                     graphSet.push(makegraph(rpmData,"Rotations per minute","orange","RPM",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:orange;")
@@ -621,8 +632,10 @@ function addTable(etd) {
             if(threeVoltRailData[0]!==null){
                 if(typegraph === "fiveVoltRail"){
                     if(outOfOrder){
-                        console.log("Sorting");
-                        threeVoltRailData = totalHeapSort(threeVoltRailData);
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            threeVoltRailData = totalHeapSort(threeVoltRailData);
+                        }
                     }
                     graphSet.push(makegraph(fiveVoltRailData,"5 Volt Rail Voltage","grey","Voltage",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:grey;")
@@ -631,8 +644,10 @@ function addTable(etd) {
             if(fiveVoltRailData[0]!==null){
                 if(typegraph === "threeVoltRail"){
                     if(outOfOrder){
-                        console.log("Sorting");
-                        fiveVoltRailData = totalHeapSort(fiveVoltRailData);
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            fiveVoltRailData = totalHeapSort(fiveVoltRailData);
+                        }
                     }
                     graphSet.push(makegraph(threeVoltRailData,"3.3 Volt Rail Voltage","grey","Voltage",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:grey;")
@@ -641,8 +656,10 @@ function addTable(etd) {
             if(pluggedInData[0] !== null){
                 if(typegraph === "pluggedIn"){
                     if(outOfOrder){
-                        console.log("Sorting");
-                        pluggedInData = totalHeapSort(pluggedInData);
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            pluggedInData = totalHeapSort(pluggedInData);
+                        }
                     }
                     graphSet.push(makegraph(pluggedInData,"Plugged in Instances","green","Instances",0,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:grey;")
