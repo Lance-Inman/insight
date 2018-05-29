@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name=viewport content="width=device-width, initial-scale=1">
-    <title>DPS Insight V0.6</title>
+    <title>DPS Insight V1.0.1</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="style.css?1.0.1">
     <link rel="stylesheet" type="text/css" href="dygraphs/dist/dygraph.min.css">
-    <script type="text/javascript" src="dygraphs/dist/dygraph.min.js"></script>
+    <script type="text/javascript" src="dygraphs/dist/dygraph.js"></script>
     <script type="text/javascript" src="dygraphs/src/extras/synchronizer.js"></script>
 </head>
 <body>
@@ -44,18 +44,13 @@
                 <label for="0x11A">0x11A: Pressure Info</label></div>
             <div><input type="checkbox" name="hex-code" id="0x11B" value="0x11B" autocomplete="off">
                 <label for="0x11B">0x11B: RPM</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x100" value="0x100" autocomplete="off">
-                <label for="0x100">0x100: EOT Transmit</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x120" value="0x120" autocomplete="off">
-                <label for="0x120">0x120: EOT Receive</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x138" value="0x138" autocomplete="off">
-                <label for="0x138">0x138: 3.3 Rail Voltage</label></div>
-            <div><input type="checkbox" name="hex-code" id="0x139" value="0x139" autocomplete="off">
-                <label for="0x139">0x139: 5.0 Rail Voltage</label></div>
             <button id="reparse">Reparse files</button>
         </div>
     </div>
     <div id="graphdiv" style="background-color: white;width:100%;"></div>
     <div id="results-panel"></div>
-    <script src="log_parser.js?6.0.2"></script>
+    <div id="footer">
+        <p class="text-center footer">Version 1.0.1</p>
+    </div>
+    <script src="log_parser.js?1.0.1"></script>
 </body>

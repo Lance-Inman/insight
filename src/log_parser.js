@@ -1,5 +1,6 @@
 var etd_list = [];
 var reader = new FileReader();
+var doNotSort = false;
 function readFiles(files) {
     etd_list = [];
     var index = 0;
@@ -37,41 +38,61 @@ function readFiles(files) {
                 document.getElementById("status").innerHTML = "Done";
                 document.getElementById("grid-input-panel").style.backgroundColor = "#4CAF50";
                 toggleDropdown("options-dropdown-content");
+                var reparseButton = document.getElementById("reparse");
+                reparseButton.style.display = "inherit";
+                reparseButton.addEventListener("click",function(){readFiles(files)});
             }
         };
     reader.onloadend =
         function () {
         };
-
     if (files.length > 0) {
         document.getElementById("status").innerHTML = "Loading files...";
         files = [].slice.call(files).sort(chronCompare);
-        var reparseButton = document.getElementById("reparse");
-        reparseButton.style.display = "inherit";
-        reparseButton.addEventListener("click",function(){readFiles(files)});
         document.getElementById("status").innerHTML = "Parsing files...";
         reader.readAsText(files[0]);
     }
 }
-
-// compare the arrays item by item and return the concatenated result
-function merge (left, right) {
-    var result = [];
-    var indexLeft = 0;
-    var indexRight = 0;
-
-    while (indexLeft < left.length && indexRight < right.length) {
-        if (left[indexLeft] < right[indexRight]) {
-            result.push(left[indexLeft]);
-            indexLeft++;
-        } else {
-            result.push(right[indexRight]);
-            indexRight++;
+/* to create MAX  array */
+function totalHeapSort(input){
+    var array_length;
+    var array = input;
+    function heap_root(input, i) {
+        var left = 2 * i + 1;
+        var right = 2 * i + 2;
+        var max = i;
+        if (left < array_length && input[left][0] > input[max][0]) {
+            max = left;
+        }
+        if (right < array_length && input[right][0] > input[max][0])     {
+            max = right;
+        }
+        if (max != i) {
+            swap(input, i, max);
+            heap_root(input, max);
         }
     }
-
-    return result.concat(left.slice(indexLeft)).concat(right.slice(indexRight))
+    function swap(input, index_A, index_B) {
+        var temp = input[index_A];
+        input[index_A] = input[index_B];
+        input[index_B] = temp;
+    }
+    function heapSort(input) {
+        array_length = input.length;
+        for (var i = Math.floor(array_length / 2); i >= 0; i -= 1)      {
+            heap_root(input, i);
+        }
+        for (i = input.length - 1; i > 0; i--) {
+            swap(input, 0, i);
+            array_length--;
+            heap_root(input, 0);
+        }
+        return input
+    }
+    heapSort(array);
+    return array;
 }
+
 //If you pass in a string of the hex code it will return what the hex code means in plain english
 function hexToText(hex){
     if(hex === "0x1"){
@@ -334,7 +355,6 @@ function hexToText(hex){
     }
     return null
 }
-
 function addTable(etd) {
     // Create a dropdown panel for the etd
     var etdDropdown = document.createElement("div");
@@ -360,6 +380,7 @@ function addTable(etd) {
     // For each hex code tracked by the etd
     var isEmpty = true;
     for(var code_num = 0; code_num < etd.tracked_codes.length; code_num++) {
+        var outOfOrder = false;
         var tracked_code = etd.tracked_codes[code_num];
         var graphable = isGraphable(tracked_code.code);
         var typegraph = "";
@@ -367,11 +388,10 @@ function addTable(etd) {
         if(tracked_code.logs.length === 0) continue;
         isEmpty = false;
         // Create a dropdown panel for the hex code
-
         var hexDropdown = document.createElement("div");
         hexDropdown.setAttribute("class", "hex-dropdown");
         var hexButton = document.createElement("button");
-        if(hexToText(tracked_code.code) == null){
+        if(hexToText(tracked_code.code) === null){
             hexButton.appendChild(document.createTextNode(tracked_code.code+": "+tracked_code.logs.length));
         }else{
             hexButton.appendChild(document.createTextNode(hexToText(tracked_code.code)+": "+tracked_code.logs.length));
@@ -412,6 +432,8 @@ function addTable(etd) {
         header.appendChild(td3);
         header.appendChild(td4);
         table.appendChild(header);
+        var lastDate = new Date();
+        lastDate.setYear(100);
         // For each log of the tracked code
         for(var log_num = 0; log_num < tracked_code.logs.length; log_num++) {
             // Create a table row
@@ -425,6 +447,7 @@ function addTable(etd) {
             td2.appendChild(document.createTextNode(values[1]));
             td3.appendChild(document.createTextNode(values[2]));
             td4.appendChild(document.createTextNode(values[3]));
+
             if(graphable) {
                 //-----------------------Graphing------------------------------//
                 /*we start with the regex commands which need to be unique to each
@@ -433,6 +456,7 @@ function addTable(etd) {
                   reason for the two regexes is because our log files changed)
                 */
                 //Date Formatting
+                document.getElementById("status").innerHTML = "Making graphs...";
                 var yearRegex = /[0-9]{4}/;
                 var monthRegex = /[a-zA-Z]+/;
                 var dayRegex = /^[0-9]{1,2}/;
@@ -442,9 +466,17 @@ function addTable(etd) {
                 var dayRegexmatch = dayRegex.exec(values[0]);
                 var timeRegexmatch = timeRegex.exec(values[0]);
                 var month = changeMonthtoNumber(monthRegexmatch[0]);
+                var date;
                 try {
                     if (monthRegexmatch[0] !== null && dayRegexmatch[0] !== null && timeRegexmatch[0] !== null && yearRegexMatch[0]) {
-                        var date = new Date(yearRegexMatch[0] + "/" + month + "/" + dayRegexmatch[0] + " " + timeRegexmatch);
+                        date = new Date(yearRegexMatch[0] + "/" + month + "/" + dayRegexmatch[0] + " " + timeRegexmatch);
+                        if(lastDate !== null){
+                            //Added an offeset of 6 hours for the time to be off, this prevents very small errors from showing the message
+                            if(lastDate.getTime() > (date.getTime() + 2.16e+7)){
+                                outOfOrder = true;
+                                console.log("Log content out of order");
+                            }
+                        }
                     } else {
                         console.log(values);
                     }
@@ -453,6 +485,7 @@ function addTable(etd) {
                     console.log(values);
                     continue;
                 }
+                lastDate = date;
                 var batteryRegex = /(?:Info, )([0-9.]+(?=V))/;
                 var batteryRegex2 = /(?:Battery V, )([0-9.]+(?=V))/;
                 var temperatureRegex = /[-]*[0-9.]+(?=F)/;
@@ -475,7 +508,6 @@ function addTable(etd) {
                         }
                     }
                 }
-
                 if (typegraph === ""){
                     var match = pluggedIn.exec(values[3]);
                     if (match !== null) {
@@ -524,59 +556,113 @@ function addTable(etd) {
           is of the correct type to make the graph, we then make a div and set up its attributes
           Finally we add an event listener to redraw the graph when you click on the graphs table button
         */
-
         if(graphable){
             if(tempData[0] !== null) {
                 if (typegraph === "temperature") {
+                    if(outOfOrder){
+                        if(!doNotSort){
+                            console.log("Sorting");
+                            tempData = totalHeapSort(tempData);
+                        }
+                    }
                     graphSet.push(makegraph(tempData,"Temperature over Time","red","Degrees Fahrenheit",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:red;")
                 }
             }
             if(turbVData[0] !== null) {
                 if (typegraph === "turbineVoltage") {
+                    if(outOfOrder){
+                        if(!doNotSort){
+                            console.log("Sorting");
+                            turbVData = totalHeapSort(turbVData);
+                        }
+                    }
                     graphSet.push(makegraph(turbVData,"Turbine voltage over time","blue","Voltage",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:blue;")
                 }
             }
             if(batteryData[0] !== null) {
                 if (typegraph === "battery1" || typegraph === "battery2") {
+                    if(outOfOrder){
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            batteryData = totalHeapSort(batteryData);
+                        }
+                    }
                     graphSet.push(makegraph(batteryData,"Battery Voltage over Time","green","Battery Voltage",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:green;")
                 }
             }
             if(pressureData[0] !== null) {
                 if (typegraph === "pressure") {
+                    if(outOfOrder){
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            pressureData = totalHeapSort(pressureData);
+                        }
+                    }
                     graphSet.push(makegraph(pressureData,"Pressure over Time","purple","PSI",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:purple;")
                 }
             }
             if(pressureData[0] !== null) {
                 if (typegraph === "pressure2") {
+                    if(outOfOrder){
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            pressureData = totalHeapSort(pressureData);
+                        }
+                    }
                     graphSet.push(makegraph(pressureData,"Pressure over Time","purple","PSI",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:purple;")
                 }
             }
             if(rpmData[0] !== null){
                 if(typegraph === "rpm"){
+                    if(outOfOrder){
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            rpmData = totalHeapSort(rpmData);
+                        }
+                    }
                     graphSet.push(makegraph(rpmData,"Rotations per minute","orange","RPM",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:orange;")
                 }
             }
             if(threeVoltRailData[0]!==null){
                 if(typegraph === "fiveVoltRail"){
+                    if(outOfOrder){
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            threeVoltRailData = totalHeapSort(threeVoltRailData);
+                        }
+                    }
                     graphSet.push(makegraph(fiveVoltRailData,"5 Volt Rail Voltage","grey","Voltage",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:grey;")
                 }
             }
             if(fiveVoltRailData[0]!==null){
                 if(typegraph === "threeVoltRail"){
+                    if(outOfOrder){
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            fiveVoltRailData = totalHeapSort(fiveVoltRailData);
+                        }
+                    }
                     graphSet.push(makegraph(threeVoltRailData,"3.3 Volt Rail Voltage","grey","Voltage",.7,hexDropdownContent,hexButton));
                     showDataButton.setAttribute("style","background-color:grey;")
                 }
             }
             if(pluggedInData[0] !== null){
                 if(typegraph === "pluggedIn"){
+                    if(outOfOrder){
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            pluggedInData = totalHeapSort(pluggedInData);
+                        }
+                    }
                     graphSet.push(makegraph(pluggedInData,"Plugged in Instances","green","Instances",0,hexDropdownContent,hexButton));
+                    showDataButton.setAttribute("style","background-color:grey;")
                 }
             }
             hexDropdownContent.appendChild(showDataButton);
@@ -612,9 +698,6 @@ function addTable(etd) {
     etdDropdown.appendChild(etdDropdownContent);
     var element = document.getElementById("results-panel");
     element.appendChild(etdDropdown);
-    //Adding the button to reparse - when reparsing we get super slow and the numbers are not in order
-
-
 }
 function makegraph(data,name,color,yaxisLabel,strokeWidth,parent,dropdown) {
     var newgraph = document.createElement("div");
@@ -630,6 +713,7 @@ function makegraph(data,name,color,yaxisLabel,strokeWidth,parent,dropdown) {
             title: name,
             showRoller: true,
             ylabel: yaxisLabel,
+            xlabel: "Time",
             strokeWidth: strokeWidth,
             color: color,
             drawPoints: true
@@ -715,14 +799,12 @@ function changeMonthtoNumber(month){
 function toggleDropdown(elementId) {
     document.getElementById(elementId).classList.toggle("show");
 }
-
 function createTrackedCode(code) {
     var obj = {};
     obj.code = code;
     obj.logs = [];
     return obj;
 }
-
 function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_time) {
     var obj = {};
     try {
@@ -826,7 +908,6 @@ function parseETDFile(reader, etd_list) {
     }
     return etd_list;
 }
-
 function loadOptions(etd) {
     if(document.getElementById("custom-hex-input").value) {
         var codes = document.getElementById("custom-hex-input").value;
@@ -855,15 +936,6 @@ function loadOptions(etd) {
     }
     if(document.querySelector('input[value="0x11B"]').checked) {
         etd.addCode("0x11B");
-    }
-    if(document.querySelector('input[value="0x120"]').checked) {
-        etd.addCode("0x120");
-    }
-    if(document.querySelector('input[value="0x138"]').checked) {
-        etd.addCode("0x138");
-    }
-    if(document.querySelector('input[value="0x139"]').checked) {
-        etd.addCode("0x139");
     }
     if(document.querySelector('input[value="critical"]').checked) {
         etd.addCode("0x1");
