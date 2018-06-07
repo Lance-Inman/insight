@@ -921,6 +921,9 @@ function loadOptions(etd) {
     if(document.querySelector('input[value="0x10A"]').checked) {
         etd.addCode("0x10A");
     }
+    if(document.querySelector('input[value="0x10B"]').checked) {
+        etd.addCode("0x10B");
+    }
     if(document.querySelector('input[value="0x114"]').checked) {
         etd.addCode("0x114");
     }
@@ -936,6 +939,12 @@ function loadOptions(etd) {
     }
     if(document.querySelector('input[value="0x11B"]').checked) {
         etd.addCode("0x11B");
+    }
+    if(document.querySelector('input[value="0x138"]').checked) {
+        etd.addCode("0x138");
+    }
+    if(document.querySelector('input[value="0x139"]').checked) {
+        etd.addCode("0x139");
     }
     if(document.querySelector('input[value="critical"]').checked) {
         etd.addCode("0x1");
