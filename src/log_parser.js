@@ -377,6 +377,8 @@ function addTable(etd) {
     var threeVoltRailData = [];
     var graphSet = [];
     var pluggedInData = [];
+    var highImpactData = [];
+    var freeFallData = [];
     // For each hex code tracked by the etd
     var isEmpty = true;
     for(var code_num = 0; code_num < etd.tracked_codes.length; code_num++) {
@@ -496,6 +498,8 @@ function addTable(etd) {
                 var fiveVoltRegex = /(?:5.0 Rail V, )([0-9.]+(?=V))/;
                 var zeroX100 = /(?:Pressure = )([0-9]+)/;
                 var pluggedIn = /Charger Plugged In/;
+                var highImpact = /ABUSE DETECTED - HIGH IMPACT/;
+                var freeFall = /ABUSE DETECTED - FREEFALL/;
                 //We systematically regex check the values to see if it corresponds to a type
                 function pushMatches(regex, date, string, graphName, dataset) {
                     var match = regex.exec(string);
@@ -513,6 +517,16 @@ function addTable(etd) {
                     if (match !== null) {
                         pluggedInData.push([date,1]);
                         typegraph = "pluggedIn";
+                    }
+                    var abuseMatch = highImpact.exec(values[3]);
+                    if (abuseMatch !== null) {
+                        highImpactData.push([date,1]);
+                        typegraph = "highImpact";
+                    }
+                    var freeFallMatch = freeFall.exec(values[3]);
+                    if(freeFallMatch !== null){
+                        freeFallData.push([date,1]);
+                        typegraph = "freeFall";
                     }
                     pushMatches(batteryRegex, date, values[3], "battery1", batteryData);
                     pushMatches(batteryRegex2, date, values[3], "battery2", batteryData);
@@ -544,6 +558,10 @@ function addTable(etd) {
                     pushMatches(zeroX100, date, values[3], "pressure2", pressureData);
                 }else if (typegraph === "pluggedIn") {
                     pluggedInData.push([date,1]);
+                }else if (typegraph === "highImpact"){
+                    highImpactData.push([date,1]);
+                }else if (typegraph === "freeFall"){
+                    freeFallData.push([date,1]);
                 }
             }
             row.appendChild(td1);
@@ -662,7 +680,31 @@ function addTable(etd) {
                         }
                     }
                     graphSet.push(makegraph(pluggedInData,"Plugged in Instances","green","Instances",0,hexDropdownContent,hexButton));
-                    showDataButton.setAttribute("style","background-color:grey;")
+                    showDataButton.setAttribute("style","background-color:green;")
+                }
+            }
+            if(highImpactData[0]!== null){
+                if(typegraph === "highImpact"){
+                    if(outOfOrder){
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            highImpactData = totalHeapSort(highImpactData);
+                        }
+                    }
+                    graphSet.push(makegraph(highImpactData,"High Impact Instances","red","Instances",0,hexDropdownContent,hexButton));
+                    showDataButton.setAttribute("style","background-color:red;")
+                }
+            }
+            if(freeFallData[0]!== null){
+                if(typegraph === "freeFall"){
+                    if(outOfOrder){
+                        if(!doNotSort) {
+                            console.log("Sorting");
+                            freeFallData = totalHeapSort(freeFallData);
+                        }
+                    }
+                    graphSet.push(makegraph(freeFallData,"Free Fall Instances","red","Instances",0,hexDropdownContent,hexButton));
+                    showDataButton.setAttribute("style","background-color:red;")
                 }
             }
             hexDropdownContent.appendChild(showDataButton);
@@ -681,6 +723,7 @@ function addTable(etd) {
         rpmData = [];
         fiveVoltRailData = [];
         threeVoltRailData = [];
+        highImpactData = [];
     }
     if(isEmpty) {
         console.log("empty");
@@ -751,6 +794,12 @@ function isGraphable(hex){
         return true
     }
     if(hex === "0x100"){
+        return true
+    }
+    if(hex==="0x13B"){
+        return true
+    }
+    if(hex==="0x13C"){
         return true
     }
     return false;
@@ -971,6 +1020,8 @@ function loadOptions(etd) {
         etd.addCode("0x17");
         etd.addCode("0x1D");
         etd.addCode("0x12E");
+        etd.addCode("0x13B");
+        etd.addCode("0x13C");
     }
 }
 //--------------------Creating extra element on 0x11A------------------------//
