@@ -1,5 +1,6 @@
 var etd_list = [];
 var reader = new FileReader();
+//If true, sorting does not take place
 var doNotSort = false;
 function readFiles(files) {
     etd_list = [];
@@ -22,6 +23,7 @@ function readFiles(files) {
     reader.onload =
         function () {
             console.log("parsed file " + (index+1) + "/" + files.length);
+            //Progress bar handler - maybe swap to an animation style but this works fine
             var multiplier = 100/files.length;
             var currentPercent = multiplier * (index+1);
             document.getElementById("grid-input-panel").setAttribute("style","background: linear-gradient(to right, " +
@@ -53,7 +55,7 @@ function readFiles(files) {
         reader.readAsText(files[0]);
     }
 }
-/* to create MAX  array */
+//Heap sort function - this seemed like the best way to sort the data if needed
 function totalHeapSort(input){
     var array_length;
     var array = input;
@@ -417,7 +419,6 @@ function addTable(etd) {
             dataDropDownContent.setAttribute("class", "hex-dropdown-content");
             showDataButton.appendChild(dataDropDownContent);
         }
-
         // Create a table and table header
         var table = document.createElement("table");
         var header = document.createElement("tr");
