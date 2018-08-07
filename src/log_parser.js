@@ -381,6 +381,32 @@ function addTable(etd) {
     var pluggedInData = [];
     var highImpactData = [];
     var freeFallData = [];
+    var accelerometerData = [];
+    //Time regex's
+    var yearRegex = /[0-9]{4}/;
+    var monthRegex = /[a-zA-Z]+/;
+    var dayRegex = /^[0-9]{1,2}/;
+    var timeRegex = /[0-9]{2}:[0-9]{2}:[0-9]{2}/;
+    //Data regex's
+    var batteryRegex = /(?:Info, )([0-9.]+(?=V))/;
+    var batteryRegex2 = /(?:Battery V, )([0-9.]+(?=V))/;
+    var temperatureRegex = /[-]*[0-9.]+(?=F)/;
+    var turbVRegex = /(?:Turbine V, )([0-9.]+(?=V))/;
+    var pressureRegex = /[0-9.]+(?=PSI)/;
+    var rpmRegex = /[0-9.]+(?=RPM)/;
+    var threeVoltRegex = /(?:3.3 Rail V, )([0-9.]+(?=V))/;
+    var fiveVoltRegex = /(?:5.0 Rail V, )([0-9.]+(?=V))/;
+    var zeroX100 = /(?:Pressure = )([0-9]+)/;
+    var pluggedIn = /Charger Plugged In/;
+    var highImpact = /ABUSE DETECTED - HIGH IMPACT/;
+    var freeFall = /ABUSE DETECTED - FREEFALL/;
+    var accelerometerNewDown = /[0-9.]+(?=G Down)/;
+    var accelerometerNewUp = /[0-9.]+(?=G Up)/;
+    var accelerometerNewFront = /[0-9.]+(?=G Front)/;
+    var accelerometerNewBack = /[0-9.]+(?=G Back)/;
+    var accelerometerNewLeft = /[0-9.]+(?=G Left)/;
+    var accelerometerNewRight = /[0-9.]+(?=G Right)/
+
     // For each hex code tracked by the etd
     var isEmpty = true;
     for(var code_num = 0; code_num < etd.tracked_codes.length; code_num++) {
@@ -450,7 +476,7 @@ function addTable(etd) {
             td2.appendChild(document.createTextNode(values[1]));
             td3.appendChild(document.createTextNode(values[2]));
             td4.appendChild(document.createTextNode(values[3]));
-
+            
             if(graphable) {
                 //-----------------------Graphing------------------------------//
                 /*we start with the regex commands which need to be unique to each
@@ -460,10 +486,6 @@ function addTable(etd) {
                 */
                 //Date Formatting
                 document.getElementById("status").innerHTML = "Making graphs...";
-                var yearRegex = /[0-9]{4}/;
-                var monthRegex = /[a-zA-Z]+/;
-                var dayRegex = /^[0-9]{1,2}/;
-                var timeRegex = /[0-9]{2}:[0-9]{2}:[0-9]{2}/;
                 var yearRegexMatch = yearRegex.exec(values[0]);
                 var monthRegexmatch = monthRegex.exec(values[0]);
                 var dayRegexmatch = dayRegex.exec(values[0]);
@@ -489,18 +511,7 @@ function addTable(etd) {
                     continue;
                 }
                 lastDate = date;
-                var batteryRegex = /(?:Info, )([0-9.]+(?=V))/;
-                var batteryRegex2 = /(?:Battery V, )([0-9.]+(?=V))/;
-                var temperatureRegex = /[-]*[0-9.]+(?=F)/;
-                var turbVRegex = /(?:Turbine V, )([0-9.]+(?=V))/;
-                var pressureRegex = /[0-9.]+(?=PSI)/;
-                var rpmRegex = /[0-9.]+(?=RPM)/;
-                var threeVoltRegex = /(?:3.3 Rail V, )([0-9.]+(?=V))/;
-                var fiveVoltRegex = /(?:5.0 Rail V, )([0-9.]+(?=V))/;
-                var zeroX100 = /(?:Pressure = )([0-9]+)/;
-                var pluggedIn = /Charger Plugged In/;
-                var highImpact = /ABUSE DETECTED - HIGH IMPACT/;
-                var freeFall = /ABUSE DETECTED - FREEFALL/;
+
                 //We systematically regex check the values to see if it corresponds to a type
                 function pushMatches(regex, date, string, graphName, dataset) {
                     var match = regex.exec(string);
@@ -513,7 +524,34 @@ function addTable(etd) {
                         }
                     }
                 }
-                if (typegraph === ""){
+                //special handling for a code that has multiple value types
+                if(tracked_code.code === "0x12C"){
+                    var newDownMatch = accelerometerNewDown.exec(values[3]);
+                    var newUpMatch = accelerometerNewUp.exec(values[3]);
+                    var newFrontMatch = accelerometerNewFront.exec(values[3]);
+                    var newBackMatch = accelerometerNewBack.exec(values[3]);
+                    var newLeftMatch = accelerometerNewLeft.exec(values[3]);
+                    var newRightMatch = accelerometerNewRight.exec(values[3]);
+                    var resultArray = [];
+                    resultArray.push(date);
+                    if(newDownMatch !== null){
+                        resultArray.push(parseFloat(newDownMatch) *-1);
+                    }else if(newUpMatch !== null){
+                        resultArray.push(parseFloat(newUpMatch));
+                    }
+                    if(newFrontMatch !== null){
+                        resultArray.push(parseFloat(newFrontMatch));
+                    }else if(newBackMatch !== null){
+                        resultArray.push(parseFloat(newBackMatch) * -1);
+                    }
+                    if(newLeftMatch !== null){
+                        resultArray.push(parseFloat(newLeftMatch) *-1);
+                    }else if(newRightMatch !== null){
+                        resultArray.push(parseFloat(newRightMatch));
+                    }
+                    accelerometerData.push(resultArray);
+                }
+                else if (typegraph === ""){
                     var match = pluggedIn.exec(values[3]);
                     if (match !== null) {
                         pluggedInData.push([date,1]);
@@ -708,6 +746,36 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:red;")
                 }
             }
+            if(accelerometerData[0] !== null){
+                if(outOfOrder){
+                    if(!doNotSort) {
+                        console.log("Sorting");
+                        freeFallData = totalHeapSort(freeFallData);
+                    }
+                }
+                var newgraph = document.createElement("div");
+                newgraph.setAttribute("id", "graphdiv-" + name);
+                newgraph.style.width = "100%";
+                newgraph.style.color = "black";
+                newgraph.style.backgroundColor = "white";
+                hexDropdownContent.appendChild(newgraph);
+                var nGraph = new Dygraph(
+                newgraph,
+                accelerometerData, {
+                    legend: 'always',
+                    title: name,
+                    showRoller: true,
+                    labels: ["x","Up-Down","Front-Back","Left-Right"],
+                    strokeWidth: .7,
+                    colors: ["gold","red","blue"],
+                    drawPoints: true
+                }
+                );
+                hexButton.addEventListener("click", function () {
+                    nGraph.resize();
+                });
+                graphSet.push(nGraph);
+            }
             hexDropdownContent.appendChild(showDataButton);
             dataDropDownContent.appendChild(table);
         }else{
@@ -716,6 +784,7 @@ function addTable(etd) {
         hexDropdown.appendChild(hexDropdownContent);
         etdDropdownContent.appendChild(hexDropdown);
         //reassigning data back to nothing, as the graph was already made
+        accelerometerData = [];
         pluggedInData = [];
         tempData = [];
         batteryData = [];
@@ -786,6 +855,9 @@ function isGraphable(hex){
         return true
     }
     if(hex === "0x10A"){
+        return true
+    }
+    if(hex === "0x12C"){
         return true
     }
     if(hex === "0x138"){
@@ -989,6 +1061,9 @@ function loadOptions(etd) {
     }
     if(document.querySelector('input[value="0x11B"]').checked) {
         etd.addCode("0x11B");
+    }
+    if(document.querySelector('input[value="0x12C"]').checked) {
+        etd.addCode("0x12C");
     }
     if(document.querySelector('input[value="0x138"]').checked) {
         etd.addCode("0x138");
