@@ -1,5 +1,6 @@
 var etd_list = [];
 var reader = new FileReader();
+var pageResultCount = 1000;
 //If true, sorting does not take place
 var doNotSort = false;
 function readFiles(files) {
@@ -406,6 +407,7 @@ function addTable(etd) {
     var accelerometerNewBack = /[0-9.]+(?=G Back)/;
     var accelerometerNewLeft = /[0-9.]+(?=G Left)/;
     var accelerometerNewRight = /[0-9.]+(?=G Right)/
+    var accelerometerOldAll = /[0-9.-]+(?= [XYZ])/g;
 
     // For each hex code tracked by the etd
     var isEmpty = true;
@@ -443,7 +445,6 @@ function addTable(etd) {
             var dataDropDownContent = document.createElement("div");
             dataDropDownContent.setAttribute("id", (""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num+"-data")));
             dataDropDownContent.setAttribute("class", "hex-dropdown-content");
-            showDataButton.appendChild(dataDropDownContent);
         }
         // Create a table and table header
         var table = document.createElement("table");
@@ -461,12 +462,52 @@ function addTable(etd) {
         header.appendChild(td3);
         header.appendChild(td4);
         table.appendChild(header);
+        //This is lances addition - this doesnt make sense to me haha - keefer
         var lastDate = new Date();
         lastDate.setYear(100);
+        //Holing the current page number for pagination
+        var currentClassNumber = 0;
+        var nextPageButton = $(document.createElement("button"));
+        var prevPageButton = $(document.createElement("button"));
+        var pageNumberHTMLDescription = $(document.createElement("p"));
+        var maxPageNumberHTMLDescription = $(document.createElement("span"));
+        var pageControlHolder = $(document.createElement("div"));
+        pageControlHolder.addClass("pageControlHolder");
+        nextPageButton.attr("code",tracked_code.code);
+        prevPageButton.attr("code",tracked_code.code);
+        pageNumberHTMLDescription.attr("style","display:inline-block");
+        maxPageNumberHTMLDescription.attr("style","display:inline-block");
+        pageNumberHTMLDescription.text("Page 1");
+        nextPageButton.attr("currentPage","1");
+        prevPageButton.attr("currentPage","1");
+        prevPageButton.text("Previous Page");
+        nextPageButton.text("Next Page");
+        nextPageButton.addClass("nextPageButton");
+        pageNumberHTMLDescription.append(maxPageNumberHTMLDescription)
+        $(dataDropDownContent).append(pageControlHolder);
         // For each log of the tracked code
+        if(graphable){
+            $(pageControlHolder).append(prevPageButton);
+            $(pageControlHolder).append(pageNumberHTMLDescription);
+            $(pageControlHolder).append(nextPageButton);
+        }else{
+            $(pageControlHolder).append(prevPageButton);
+            $(pageControlHolder).append(pageNumberHTMLDescription);
+            $(pageControlHolder).append(nextPageButton);
+        }
         for(var log_num = 0; log_num < tracked_code.logs.length; log_num++) {
             // Create a table row
             var row = document.createElement("tr");
+            //Zero works, so first index is 1
+            if(log_num%pageResultCount === 0){
+                currentClassNumber++;
+            }
+            //We want to show the first row
+            if(currentClassNumber !== 1){
+                row.setAttribute("style","display:none");
+            }
+            //Setting the class up for display swapping
+            row.setAttribute("class",tracked_code.code + "-" + currentClassNumber);
             var values = tracked_code.logs[log_num].split('\t');
             td1 = document.createElement("td");
             td2 = document.createElement("td");
@@ -476,7 +517,6 @@ function addTable(etd) {
             td2.appendChild(document.createTextNode(values[1]));
             td3.appendChild(document.createTextNode(values[2]));
             td4.appendChild(document.createTextNode(values[3]));
-            
             if(graphable) {
                 //-----------------------Graphing------------------------------//
                 /*we start with the regex commands which need to be unique to each
@@ -493,7 +533,7 @@ function addTable(etd) {
                 var month = changeMonthtoNumber(monthRegexmatch[0]);
                 var date;
                 try {
-                    if (monthRegexmatch[0] !== null && dayRegexmatch[0] !== null && timeRegexmatch[0] !== null && yearRegexMatch[0]) {
+                    if (monthRegexmatch.length !== 0 && dayRegexmatch.length !== 0 && timeRegexmatch.length !== 0 && yearRegexMatch.length !== 0) {
                         date = new Date(yearRegexMatch[0] + "/" + month + "/" + dayRegexmatch[0] + " " + timeRegexmatch);
                         if(lastDate !== null){
                             //Added an offeset of 6 hours for the time to be off, this prevents very small errors from showing the message
@@ -511,7 +551,6 @@ function addTable(etd) {
                     continue;
                 }
                 lastDate = date;
-
                 //We systematically regex check the values to see if it corresponds to a type
                 function pushMatches(regex, date, string, graphName, dataset) {
                     var match = regex.exec(string);
@@ -526,28 +565,60 @@ function addTable(etd) {
                 }
                 //special handling for a code that has multiple value types
                 if(tracked_code.code === "0x12C"){
-                    var newDownMatch = accelerometerNewDown.exec(values[3]);
-                    var newUpMatch = accelerometerNewUp.exec(values[3]);
-                    var newFrontMatch = accelerometerNewFront.exec(values[3]);
-                    var newBackMatch = accelerometerNewBack.exec(values[3]);
-                    var newLeftMatch = accelerometerNewLeft.exec(values[3]);
-                    var newRightMatch = accelerometerNewRight.exec(values[3]);
                     var resultArray = [];
+                    //Pushing the date here because it will need to be pushed before any of the function calls
                     resultArray.push(date);
-                    if(newDownMatch !== null){
-                        resultArray.push(parseFloat(newDownMatch) *-1);
-                    }else if(newUpMatch !== null){
-                        resultArray.push(parseFloat(newUpMatch));
+                    function getNewAccelerometerData(){
+                        var newDownMatch = accelerometerNewDown.exec(values[3]);
+                        var newUpMatch = accelerometerNewUp.exec(values[3]);
+                        var newFrontMatch = accelerometerNewFront.exec(values[3]);
+                        var newBackMatch = accelerometerNewBack.exec(values[3]);
+                        var newLeftMatch = accelerometerNewLeft.exec(values[3]);
+                        var newRightMatch = accelerometerNewRight.exec(values[3]);
+                        if(newDownMatch !== null){
+                            resultArray.push(parseFloat(newDownMatch) * -1);
+                        }else if(newUpMatch !== null){
+                            resultArray.push(parseFloat(newUpMatch));
+                        }
+                        if(newFrontMatch !== null){
+                            resultArray.push(parseFloat(newFrontMatch));
+                        }else if(newBackMatch !== null){
+                            resultArray.push(parseFloat(newBackMatch) * -1);
+                        }
+                        if(newLeftMatch !== null){
+                            resultArray.push(parseFloat(newLeftMatch) * -1);
+                            //returning true here because we can, and it will set the graphtype without
+                            //extra checking of array size
+                            return true;
+                        }else if(newRightMatch !== null){
+                            resultArray.push(parseFloat(newRightMatch));
+                            //returning true here because we can, and it will set the graphtype without
+                            //extra checking of array size
+                            return true;
+                        }
                     }
-                    if(newFrontMatch !== null){
-                        resultArray.push(parseFloat(newFrontMatch));
-                    }else if(newBackMatch !== null){
-                        resultArray.push(parseFloat(newBackMatch) * -1);
+                    function getOldAccelerometerData(){
+                        var allMatch = values[3].match(accelerometerOldAll);
+                        var flag = false;
+                        for(var x = 0;x<allMatch.length;x++){
+                            //conversion factor of /50 since 50=1G with old sensors
+                            resultArray.push(parseFloat(allMatch[x])/50);
+                            flag = true;
+                        }
+                        return flag;
                     }
-                    if(newLeftMatch !== null){
-                        resultArray.push(parseFloat(newLeftMatch) *-1);
-                    }else if(newRightMatch !== null){
-                        resultArray.push(parseFloat(newRightMatch));
+                    if(typegraph === ""){
+                        if(getNewAccelerometerData()){
+                            typegraph = "newAccelerometer";
+                        }
+                        else if(getOldAccelerometerData()){
+                            typegraph = "oldAccelerometer";
+                        }
+                    }else if(typegraph === "newAccelerometer"){
+                        getNewAccelerometerData();
+                    }else if(typegraph === "oldAccelerometer"){
+
+                        getOldAccelerometerData();
                     }
                     accelerometerData.push(resultArray);
                 }
@@ -609,12 +680,76 @@ function addTable(etd) {
             row.appendChild(td4);
             table.appendChild(row);
         }
+        if(currentClassNumber === 1){
+            if(graphable){
+                nextPageButton.remove();
+                prevPageButton.remove();
+                pageNumberHTMLDescription.remove();
+                maxPageNumberHTMLDescription.remove();
+            }else{
+                nextPageButton.remove();
+                prevPageButton.remove();
+                pageNumberHTMLDescription.remove();
+                maxPageNumberHTMLDescription.remove();
+            }
+        }
+
+        //Previous page button handler, it is down here because we need to know the max page number
+        prevPageButton.on("click",function(){
+            var current = $(this);
+            var currentPage = current.next().next().attr("currentPage")
+            var currentCode = current.attr('code');
+            var currentPageHTML = $("." + currentCode + "-" + currentPage);
+            var prevPageHTML = $("." + currentCode + "-" + (-1 + +currentPage))
+            if(prevPageHTML.length === 0){
+                current.next().next().attr('currentPage',currentClassNumber);
+                prevPageHTML = $("." + currentCode + "-" + currentClassNumber);
+                currentPageHTML.attr("style","display:none");
+                prevPageHTML.attr("style","display:table row");
+                var oldChildren = current.next().children();
+                current.next().text("Page " + currentClassNumber);
+                current.next().append(oldChildren);
+            }else{
+                currentPageHTML.attr("style","display:none");
+                prevPageHTML.attr("style","display:table row");
+                current.next().next().attr('currentPage',-1 + +current.next().next().attr("currentPage"));
+                var oldChildren = current.next().children();
+                current.next().text("Page " + (-1 + +currentPage));
+                current.next().append(oldChildren);
+            }
+            console.log("." + currentCode + "-" + currentPage);
+        });
+        //Next page button handler, it is down here because previous has to be down here
+        nextPageButton.on("click",function(){
+            var current = $(this);
+            var currentPage = current.attr("currentPage")
+            var currentCode = current.attr('code');
+            var currentPageHTML = $("." + currentCode + "-" + currentPage);
+            var nextPageHTML = $("." + currentCode + "-" + (1 + +currentPage))
+            if(nextPageHTML.length === 0){
+                current.attr('currentPage',"1");
+                nextPageHTML = $("." + currentCode + "-" + 1);
+                currentPageHTML.attr("style","display:none");
+                nextPageHTML.attr("style","display:table row");
+                var oldChildren = current.prev().children();
+                current.prev().text("Page " +1);
+                current.prev().append(oldChildren);
+            }else{
+                currentPageHTML.attr("style","display:none");
+                nextPageHTML.attr("style","display:table row");
+                current.attr('currentPage',1 + +current.attr("currentPage"));
+                var oldChildren = current.prev().children();
+                current.prev().text("Page " + (1 + +currentPage));
+                current.prev().append(oldChildren);
+            }
+            console.log("." + currentCode + "-" + currentPage);
+        });
         /*For each of the if and else if statements we make sure that the graph type (or regex that matched)
           is of the correct type to make the graph, we then make a div and set up its attributes
           Finally we add an event listener to redraw the graph when you click on the graphs table button
         */
         if(graphable){
-            if(tempData[0] !== null) {
+            if(tempData.length !== 0) {
                 if (typegraph === "temperature") {
                     if(outOfOrder){
                         if(!doNotSort){
@@ -626,7 +761,7 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:red;")
                 }
             }
-            if(turbVData[0] !== null) {
+            if(turbVData.length !== 0) {
                 if (typegraph === "turbineVoltage") {
                     if(outOfOrder){
                         if(!doNotSort){
@@ -638,7 +773,7 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:blue;")
                 }
             }
-            if(batteryData[0] !== null) {
+            if(batteryData.length !== 0) {
                 if (typegraph === "battery1" || typegraph === "battery2") {
                     if(outOfOrder){
                         if(!doNotSort) {
@@ -650,7 +785,7 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:green;")
                 }
             }
-            if(pressureData[0] !== null) {
+            if(pressureData.length !== 0) {
                 if (typegraph === "pressure") {
                     if(outOfOrder){
                         if(!doNotSort) {
@@ -662,7 +797,7 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:purple;")
                 }
             }
-            if(pressureData[0] !== null) {
+            if(pressureData.length !== 0) {
                 if (typegraph === "pressure2") {
                     if(outOfOrder){
                         if(!doNotSort) {
@@ -674,7 +809,7 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:purple;")
                 }
             }
-            if(rpmData[0] !== null){
+            if(rpmData.length !== 0){
                 if(typegraph === "rpm"){
                     if(outOfOrder){
                         if(!doNotSort) {
@@ -710,7 +845,7 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:grey;")
                 }
             }
-            if(pluggedInData[0] !== null){
+            if(pluggedInData.length !== 0){
                 if(typegraph === "pluggedIn"){
                     if(outOfOrder){
                         if(!doNotSort) {
@@ -746,7 +881,9 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:red;")
                 }
             }
-            if(accelerometerData[0] !== null){
+            if(accelerometerData.length !== 0){
+                console.log("Accelerometer check passed")
+                console.log(accelerometerData);
                 if(outOfOrder){
                     if(!doNotSort) {
                         console.log("Sorting");
@@ -781,8 +918,10 @@ function addTable(etd) {
         }else{
             hexDropdownContent.appendChild(table)
         }
+        maxPageNumberHTMLDescription.html("&nbsp;of " + currentClassNumber);
         hexDropdown.appendChild(hexDropdownContent);
         etdDropdownContent.appendChild(hexDropdown);
+        $(hexDropdownContent).append(dataDropDownContent);
         //reassigning data back to nothing, as the graph was already made
         accelerometerData = [];
         pluggedInData = [];
