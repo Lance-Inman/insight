@@ -484,13 +484,15 @@ function addTable(etd) {
         nextPageButton.text("Next Page");
         nextPageButton.addClass("nextPageButton");
         pageNumberHTMLDescription.append(maxPageNumberHTMLDescription)
-        $(dataDropDownContent).append(pageControlHolder);
+        
         // For each log of the tracked code
         if(graphable){
+            $(dataDropDownContent).append(pageControlHolder);
             $(pageControlHolder).append(prevPageButton);
             $(pageControlHolder).append(pageNumberHTMLDescription);
             $(pageControlHolder).append(nextPageButton);
         }else{
+            $(hexDropdownContent).append(pageControlHolder);
             $(pageControlHolder).append(prevPageButton);
             $(pageControlHolder).append(pageNumberHTMLDescription);
             $(pageControlHolder).append(nextPageButton);
