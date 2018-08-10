@@ -174,82 +174,82 @@ function hexToText(hex){
         return "0x100 Pressure Data";
     }
     if(hex === "0x101"){
-        return "Power On From Sleep Event"
+        return "Power On From Sleep Event";
     }
     if(hex === "0x102"){
-        return "Power On From Reset Event"
+        return "Power On From Reset Event";
     }
     if(hex === "0x103"){
-        return "Power Down From Battery Low Event"
+        return "Power Down From Battery Low Event";
     }
     if(hex === "0x104"){
-        return "Power Down From Layed On Side Event"
+        return "Power Down From Layed On Side Event";
     }
     if(hex === "0x105"){
-        return "E Brake Blow From Two Perfect Packets Event"
+        return "E Brake Blow From Two Perfect Packets Event";
     }
     if(hex === "0x106"){
-        return "E Brake Blow From One Perfect And One Corrected Packet Event"
+        return "E Brake Blow From One Perfect And One Corrected Packet Event";
     }
     if(hex === "0x107"){
-        return "E Brake Blow From One Perfect Packet Event"
+        return "E Brake Blow From One Perfect Packet Event";
     }
     if(hex === "0x108"){
-        return "E Brake Blow From Two Corrected Packets Event"
+        return "E Brake Blow From Two Corrected Packets Event";
     }
     if(hex === "0x109"){
-        return "E Brake Blow From One Corrected Packet Event"
+        return "E Brake Blow From One Corrected Packet Event";
     }
     if(hex === "0x10A"){
         return "Temperature Info Event";
     }
     if(hex === "0x10B"){
-        return "External Charger Plugged In Event"
+        return "External Charger Plugged In Event";
     }
     if(hex === "0x10C"){
-        return "Kickstart Circuit Activated Event"
+        return "Kickstart Circuit Activated Event";
     }
     if(hex === "0x10D"){
-        return "ETD Entered Bench Mode Event"
+        return "ETD Entered Bench Mode Event";
     }
     if(hex === "0x10E"){
-        return "ETD Plugged into RS232 Event"
+        return "ETD Plugged into RS232 Event";
     }
     if(hex === "0x10F"){
-        return "Turbine Beyond 10000 RPM Event"
+        return "Turbine Beyond 10000 RPM Event";
     }
     if(hex === "0x110"){
-        return "Good Received Packet Event"
+        return "Good Received Packet Event";
     }
     if(hex === "0x111"){
-        return "In Motion Event"
+        return "In Motion Event";
     }
     if(hex === "0x8111") {
-        return "Motion Went Away Event"
+        return "Motion Went Away Event";
     }
     if(hex === "0x112"){
-        return "Marker Turning On Event"
+        return "Marker Turning On Event";
     }
     if(hex === "0x113"){
-        return "Arm Request Event"
+        return "Arm Request Event";
     }
     if(hex === "0x114"){
-        return "Battery Voltage Info Event"
+        return "Battery Voltage Info Event";
     }
     if(hex === "0x115"){
-        return "Turbine Voltage Info Event"
+        return "Turbine Voltage Info Event";
     }
     if(hex === "0x116"){
-        return "Follow Up Data Event"
+        return "Follow Up Data Event";
     }
     if(hex === "0x117"){
-        return "Power Down From Button Hold Event"
+        return "Power Down From Button Hold Event";
     }
     if(hex === "0x118"){
-        return "Charge Completion Event"
+        return "Charge Completion Event";
     }
     if(hex === "0x119"){
-        return "Power On From Watchdog Reset Event"
+        return "Power On From Watchdog Reset Event";
     }
     if(hex === "0x11A"){
         return "Pressure Info Event";
@@ -258,88 +258,88 @@ function hexToText(hex){
         return "RPM Info Event";
     }
     if(hex === "0x11C"){
-        return "Power Down From No Air Event"
+        return "Power Down From No Air Event";
     }
     if(hex === "0x11D"){
-        return "Power Down From Charger Unplugged Event"
+        return "Power Down From Charger Unplugged Event";
     }
     if(hex === "0x11E"){
-        return "Coordinate Info Event"
+        return "Coordinate Info Event";
     }
     if(hex === "0x11F"){
-        return "GPS Doesn't See Satellite"
+        return "GPS Doesn't See Satellite";
     }
     if(hex === "0x120"){
-        return "Radio Receive Event"
+        return "Radio Receive Event";
     }
     if(hex === "0x121"){
-        return "Radio Power level Set Too High"
+        return "Radio Power level Set Too High";
     }
     if(hex === "0x122"){
-        return "Power Down From RTC GPS Update Event"
+        return "Power Down From RTC GPS Update Event";
     }
     if(hex === "0x123"){
-        return "Power Down From Unit Disable"
+        return "Power Down From Unit Disable";
     }
     if(hex === "0x124"){
-        return "Turbine Hours Cleared Event"
+        return "Turbine Hours Cleared Event";
     }
     if(hex === "0x125"){
-        return "Battery Hours Cleared Event"
+        return "Battery Hours Cleared Event";
     }
     if(hex === "0x126"){
-        return "Location Update Sent In Event"
+        return "Location Update Sent In Event";
     }
     if(hex === "0x127"){
-        return "RTC Updated From GPS Time Event"
+        return "RTC Updated From GPS Time Event";
     }
     if(hex === "0x128"){
-        return "Radio Power Enabled Event"
+        return "Radio Power Enabled Event";
     }
     if(hex === "0x129"){
-        return "GPS Power Enabled Event"
+        return "GPS Power Enabled Event";
     }
     if(hex === "0x12A"){
-        return "Energy Conservation Mode Event"
+        return "Energy Conservation Mode Event";
     }
     if(hex === "0x12B"){
-        return "Location Update Failed Event"
+        return "Location Update Failed Event";
     }
     if(hex === "0x12C"){
-        return "Accelerometer Info Event"
+        return "Accelerometer Info Event";
     }
     if(hex === "0x12D"){
-        return "Radio Power Disabled Event"
+        return "Radio Power Disabled Event";
     }
     if(hex === "0x12E"){
-        return "Over PSI Event"
+        return "Over PSI Event";
     }
     if(hex === "0x12F"){
-        return "Emergency Dump Battery Load test Results Event"
+        return "Emergency Dump Battery Load test Results Event";
     }
     if(hex === "0x130"){
-        return "Charger Shutdown From Over Temperature PCB Event"
+        return "Charger Shutdown From Over Temperature PCB Event";
     }
     if(hex === "0x131"){
-        return "Energy Conservation Enable Reason"
+        return "Energy Conservation Enable Reason";
     }
     if(hex === "0x132"){
-        return "Energy Conservation Disable Reason"
+        return "Energy Conservation Disable Reason";
     }
     if(hex === "0x133"){
-        return "GPS Cell Info Event"
+        return "GPS Cell Info Event";
     }
     if(hex === "0x134"){
-        return "Turbine Shutoff Event"
+        return "Turbine Shutoff Event";
     }
     if(hex === "0x135"){
-        return "Arm Button Pressed Event"
+        return "Arm Button Pressed Event";
     }
     if(hex === "0x136"){
-        return "Battery Voltage Dropped Too Far After Charge Disable"
+        return "Battery Voltage Dropped Too Far After Charge Disable";
     }
     if(hex === "0x137"){
-        return "Battery Voltage Started Too High"
+        return "Battery Voltage Started Too High";
     }
     if(hex === "0x138"){
         return "3.3 Rail Voltage Info Event";
@@ -348,13 +348,13 @@ function hexToText(hex){
         return "5.0 Rail Voltage Info Event";
     }
     if(hex === "0x13A"){
-        return "GPS Detected Event"
+        return "GPS Detected Event";
     }
     if(hex === "0x13B"){
-        return "Abuse Detected Freefall Event"
+        return "Abuse Detected Freefall Event";
     }
     if(hex === "0x13C"){
-        return "Abuse Detected High Impact Event"
+        return "Abuse Detected High Impact Event";
     }
     return null
 }
@@ -406,7 +406,7 @@ function addTable(etd) {
     var accelerometerNewFront = /[0-9.]+(?=G Front)/;
     var accelerometerNewBack = /[0-9.]+(?=G Back)/;
     var accelerometerNewLeft = /[0-9.]+(?=G Left)/;
-    var accelerometerNewRight = /[0-9.]+(?=G Right)/
+    var accelerometerNewRight = /[0-9.]+(?=G Right)/;
     var accelerometerOldAll = /[0-9.-]+(?= [XYZ])/g;
 
     // For each hex code tracked by the etd
@@ -483,7 +483,7 @@ function addTable(etd) {
         prevPageButton.text("Previous Page");
         nextPageButton.text("Next Page");
         nextPageButton.addClass("nextPageButton");
-        pageNumberHTMLDescription.append(maxPageNumberHTMLDescription)
+        pageNumberHTMLDescription.append(maxPageNumberHTMLDescription);
         
         // For each log of the tracked code
         if(graphable){
@@ -604,7 +604,7 @@ function addTable(etd) {
                         var flag = false;
                         for(var x = 0;x<allMatch.length;x++){
                             //conversion factor of /50 since 50=1G with old sensors
-                            resultArray.push(parseFloat(allMatch[x])/50);
+                            resultArray.push((parseFloat(allMatch[x])/128)*2.3);
                             flag = true;
                         }
                         return flag;
