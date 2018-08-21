@@ -43,7 +43,7 @@ function readFiles(files) {
                 toggleDropdown("options-dropdown-content");
                 var reparseButton = document.getElementById("reparse");
                 reparseButton.style.display = "inherit";
-                reparseButton.addEventListener("click",function(){readFiles(files)});
+                reparseButton.addEventListener("click",function(){readFiles(files);});
             }
         };
     reader.onloadend =
@@ -90,7 +90,7 @@ function totalHeapSort(input){
             array_length--;
             heap_root(input, 0);
         }
-        return input
+        return input;
     }
     heapSort(array);
     return array;
@@ -356,7 +356,7 @@ function hexToText(hex){
     if(hex === "0x13C"){
         return "Abuse Detected High Impact Event";
     }
-    return null
+    return null;
 }
 function addTable(etd) {
     // Create a dropdown panel for the etd
@@ -981,40 +981,40 @@ function makegraph(data,name,color,yaxisLabel,strokeWidth,parent,dropdown) {
 //returns true if code is a graphable type - Such as battery voltage, board temp etc.
 function isGraphable(hex){
     if(hex == "0x10B"){
-        return true
+        return true;
     }
     if(hex === "0x114"){
-        return true
+        return true;
     }
     if(hex === "0x115"){
-        return true
+        return true;
     }
     if(hex === "0x11A"){
-        return true
+        return true;
     }
     if(hex === "0x11B"){
-        return true
+        return true;
     }
     if(hex === "0x10A"){
-        return true
+        return true;
     }
     if(hex === "0x12C"){
-        return true
+        return true;
     }
     if(hex === "0x138"){
-        return true
+        return true;
     }
     if(hex === "0x139"){
-        return true
+        return true;
     }
     if(hex === "0x100"){
-        return true
+        return true;
     }
     if(hex==="0x13B"){
-        return true
+        return true;
     }
     if(hex==="0x13C"){
-        return true
+        return true;
     }
     return false;
 }
@@ -1308,7 +1308,7 @@ function chronCompare(a, b) {
                 return -1;
             }
             if (bMonth < aMonth) {
-                return 1
+                return 1;
             }
         }
     }
