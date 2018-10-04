@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name=viewport content="width=device-width, initial-scale=1">
-    <title>DPS Insight V1.0.2</title>
+    <title>DPS Insight V1.0.5</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="style.css?1.0.2">
+    <link rel="stylesheet" type="text/css" href="style.css?1.0.5">
     <link rel="stylesheet" type="text/css" href="dygraphs/dist/dygraph.min.css">
     <script type="text/javascript" src="dygraphs/dist/dygraph.js"></script>
     <script type="text/javascript" src="dygraphs/src/extras/synchronizer.js"></script>
@@ -46,6 +46,8 @@
                 <label for="0x11A">0x11A: Pressure Info</label></div>
             <div><input type="checkbox" name="hex-code" id="0x11B" value="0x11B" autocomplete="off">
                 <label for="0x11B">0x11B: RPM</label></div>
+            <div><input type="checkbox" name="hex-code" id="0x12C" value="0x12C" autocomplete="off">
+                <label for="0x12C">0x12C: Accelerometer Info</label></div>
             <div><input type="checkbox" name="hex-code" id="0x138" value="0x138" autocomplete="off">
                 <label for="0x138">0x138: 3.3V Rail Info</label></div>
             <div><input type="checkbox" name="hex-code" id="0x139" value="0x139" autocomplete="off">
@@ -56,7 +58,8 @@
     <div id="graphdiv" style="background-color: white;width:100%;"></div>
     <div id="results-panel"></div>
     <div id="footer">
-        <p class="text-center footer">Version 1.0.2</p>
+        <p class="text-center footer">Version 1.0.5</p>
     </div>
-    <script src="log_parser.js?1.0.2"></script>
+    <script src="dependencies/jquery-3.3.1.min.js"></script>
+    <script src="log_parser.js?1.0.5"></script>
 </body>

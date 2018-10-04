@@ -1,5 +1,6 @@
 var etd_list = [];
 var reader = new FileReader();
+var pageResultCount = 1000;
 //If true, sorting does not take place
 var doNotSort = false;
 function readFiles(files) {
@@ -42,7 +43,7 @@ function readFiles(files) {
                 toggleDropdown("options-dropdown-content");
                 var reparseButton = document.getElementById("reparse");
                 reparseButton.style.display = "inherit";
-                reparseButton.addEventListener("click",function(){readFiles(files)});
+                reparseButton.addEventListener("click",function(){readFiles(files);});
             }
         };
     reader.onloadend =
@@ -89,7 +90,7 @@ function totalHeapSort(input){
             array_length--;
             heap_root(input, 0);
         }
-        return input
+        return input;
     }
     heapSort(array);
     return array;
@@ -173,82 +174,82 @@ function hexToText(hex){
         return "0x100 Pressure Data";
     }
     if(hex === "0x101"){
-        return "Power On From Sleep Event"
+        return "Power On From Sleep Event";
     }
     if(hex === "0x102"){
-        return "Power On From Reset Event"
+        return "Power On From Reset Event";
     }
     if(hex === "0x103"){
-        return "Power Down From Battery Low Event"
+        return "Power Down From Battery Low Event";
     }
     if(hex === "0x104"){
-        return "Power Down From Layed On Side Event"
+        return "Power Down From Layed On Side Event";
     }
     if(hex === "0x105"){
-        return "E Brake Blow From Two Perfect Packets Event"
+        return "E Brake Blow From Two Perfect Packets Event";
     }
     if(hex === "0x106"){
-        return "E Brake Blow From One Perfect And One Corrected Packet Event"
+        return "E Brake Blow From One Perfect And One Corrected Packet Event";
     }
     if(hex === "0x107"){
-        return "E Brake Blow From One Perfect Packet Event"
+        return "E Brake Blow From One Perfect Packet Event";
     }
     if(hex === "0x108"){
-        return "E Brake Blow From Two Corrected Packets Event"
+        return "E Brake Blow From Two Corrected Packets Event";
     }
     if(hex === "0x109"){
-        return "E Brake Blow From One Corrected Packet Event"
+        return "E Brake Blow From One Corrected Packet Event";
     }
     if(hex === "0x10A"){
         return "Temperature Info Event";
     }
     if(hex === "0x10B"){
-        return "External Charger Plugged In Event"
+        return "External Charger Plugged In Event";
     }
     if(hex === "0x10C"){
-        return "Kickstart Circuit Activated Event"
+        return "Kickstart Circuit Activated Event";
     }
     if(hex === "0x10D"){
-        return "ETD Entered Bench Mode Event"
+        return "ETD Entered Bench Mode Event";
     }
     if(hex === "0x10E"){
-        return "ETD Plugged into RS232 Event"
+        return "ETD Plugged into RS232 Event";
     }
     if(hex === "0x10F"){
-        return "Turbine Beyond 10000 RPM Event"
+        return "Turbine Beyond 10000 RPM Event";
     }
     if(hex === "0x110"){
-        return "Good Received Packet Event"
+        return "Good Received Packet Event";
     }
     if(hex === "0x111"){
-        return "In Motion Event"
+        return "In Motion Event";
     }
     if(hex === "0x8111") {
-        return "Motion Went Away Event"
+        return "Motion Went Away Event";
     }
     if(hex === "0x112"){
-        return "Marker Turning On Event"
+        return "Marker Turning On Event";
     }
     if(hex === "0x113"){
-        return "Arm Request Event"
+        return "Arm Request Event";
     }
     if(hex === "0x114"){
-        return "Battery Voltage Info Event"
+        return "Battery Voltage Info Event";
     }
     if(hex === "0x115"){
-        return "Turbine Voltage Info Event"
+        return "Turbine Voltage Info Event";
     }
     if(hex === "0x116"){
-        return "Follow Up Data Event"
+        return "Follow Up Data Event";
     }
     if(hex === "0x117"){
-        return "Power Down From Button Hold Event"
+        return "Power Down From Button Hold Event";
     }
     if(hex === "0x118"){
-        return "Charge Completion Event"
+        return "Charge Completion Event";
     }
     if(hex === "0x119"){
-        return "Power On From Watchdog Reset Event"
+        return "Power On From Watchdog Reset Event";
     }
     if(hex === "0x11A"){
         return "Pressure Info Event";
@@ -257,88 +258,88 @@ function hexToText(hex){
         return "RPM Info Event";
     }
     if(hex === "0x11C"){
-        return "Power Down From No Air Event"
+        return "Power Down From No Air Event";
     }
     if(hex === "0x11D"){
-        return "Power Down From Charger Unplugged Event"
+        return "Power Down From Charger Unplugged Event";
     }
     if(hex === "0x11E"){
-        return "Coordinate Info Event"
+        return "Coordinate Info Event";
     }
     if(hex === "0x11F"){
-        return "GPS Doesn't See Satellite"
+        return "GPS Doesn't See Satellite";
     }
     if(hex === "0x120"){
-        return "Radio Receive Event"
+        return "Radio Receive Event";
     }
     if(hex === "0x121"){
-        return "Radio Power level Set Too High"
+        return "Radio Power level Set Too High";
     }
     if(hex === "0x122"){
-        return "Power Down From RTC GPS Update Event"
+        return "Power Down From RTC GPS Update Event";
     }
     if(hex === "0x123"){
-        return "Power Down From Unit Disable"
+        return "Power Down From Unit Disable";
     }
     if(hex === "0x124"){
-        return "Turbine Hours Cleared Event"
+        return "Turbine Hours Cleared Event";
     }
     if(hex === "0x125"){
-        return "Battery Hours Cleared Event"
+        return "Battery Hours Cleared Event";
     }
     if(hex === "0x126"){
-        return "Location Update Sent In Event"
+        return "Location Update Sent In Event";
     }
     if(hex === "0x127"){
-        return "RTC Updated From GPS Time Event"
+        return "RTC Updated From GPS Time Event";
     }
     if(hex === "0x128"){
-        return "Radio Power Enabled Event"
+        return "Radio Power Enabled Event";
     }
     if(hex === "0x129"){
-        return "GPS Power Enabled Event"
+        return "GPS Power Enabled Event";
     }
     if(hex === "0x12A"){
-        return "Energy Conservation Mode Event"
+        return "Energy Conservation Mode Event";
     }
     if(hex === "0x12B"){
-        return "Location Update Failed Event"
+        return "Location Update Failed Event";
     }
     if(hex === "0x12C"){
-        return "Accelerometer Info Event"
+        return "Accelerometer Info Event";
     }
     if(hex === "0x12D"){
-        return "Radio Power Disabled Event"
+        return "Radio Power Disabled Event";
     }
     if(hex === "0x12E"){
-        return "Over PSI Event"
+        return "Over PSI Event";
     }
     if(hex === "0x12F"){
-        return "Emergency Dump Battery Load test Results Event"
+        return "Emergency Dump Battery Load test Results Event";
     }
     if(hex === "0x130"){
-        return "Charger Shutdown From Over Temperature PCB Event"
+        return "Charger Shutdown From Over Temperature PCB Event";
     }
     if(hex === "0x131"){
-        return "Energy Conservation Enable Reason"
+        return "Energy Conservation Enable Reason";
     }
     if(hex === "0x132"){
-        return "Energy Conservation Disable Reason"
+        return "Energy Conservation Disable Reason";
     }
     if(hex === "0x133"){
-        return "GPS Cell Info Event"
+        return "GPS Cell Info Event";
     }
     if(hex === "0x134"){
-        return "Turbine Shutoff Event"
+        return "Turbine Shutoff Event";
     }
     if(hex === "0x135"){
-        return "Arm Button Pressed Event"
+        return "Arm Button Pressed Event";
     }
     if(hex === "0x136"){
-        return "Battery Voltage Dropped Too Far After Charge Disable"
+        return "Battery Voltage Dropped Too Far After Charge Disable";
     }
     if(hex === "0x137"){
-        return "Battery Voltage Started Too High"
+        return "Battery Voltage Started Too High";
     }
     if(hex === "0x138"){
         return "3.3 Rail Voltage Info Event";
@@ -347,15 +348,15 @@ function hexToText(hex){
         return "5.0 Rail Voltage Info Event";
     }
     if(hex === "0x13A"){
-        return "GPS Detected Event"
+        return "GPS Detected Event";
     }
     if(hex === "0x13B"){
-        return "Abuse Detected Freefall Event"
+        return "Abuse Detected Freefall Event";
     }
     if(hex === "0x13C"){
-        return "Abuse Detected High Impact Event"
+        return "Abuse Detected High Impact Event";
     }
-    return null
+    return null;
 }
 function addTable(etd) {
     // Create a dropdown panel for the etd
@@ -381,6 +382,33 @@ function addTable(etd) {
     var pluggedInData = [];
     var highImpactData = [];
     var freeFallData = [];
+    var accelerometerData = [];
+    //Time regex's
+    var yearRegex = /[0-9]{4}/;
+    var monthRegex = /[a-zA-Z]+/;
+    var dayRegex = /^[0-9]{1,2}/;
+    var timeRegex = /[0-9]{2}:[0-9]{2}:[0-9]{2}/;
+    //Data regex's
+    var batteryRegex = /(?:Info, )([0-9.]+(?=V))/;
+    var batteryRegex2 = /(?:Battery V, )([0-9.]+(?=V))/;
+    var temperatureRegex = /[-]*[0-9.]+(?=F)/;
+    var turbVRegex = /(?:Turbine V, )([0-9.]+(?=V))/;
+    var pressureRegex = /[0-9.]+(?=PSI)/;
+    var rpmRegex = /[0-9.]+(?=RPM)/;
+    var threeVoltRegex = /(?:3.3 Rail V, )([0-9.]+(?=V))/;
+    var fiveVoltRegex = /(?:5.0 Rail V, )([0-9.]+(?=V))/;
+    var zeroX100 = /(?:Pressure = )([0-9]+)/;
+    var pluggedIn = /Charger Plugged In/;
+    var highImpact = /ABUSE DETECTED - HIGH IMPACT/;
+    var freeFall = /ABUSE DETECTED - FREEFALL/;
+    var accelerometerNewDown = /[0-9.]+(?=G Down)/;
+    var accelerometerNewUp = /[0-9.]+(?=G Up)/;
+    var accelerometerNewFront = /[0-9.]+(?=G Front)/;
+    var accelerometerNewBack = /[0-9.]+(?=G Back)/;
+    var accelerometerNewLeft = /[0-9.]+(?=G Left)/;
+    var accelerometerNewRight = /[0-9.]+(?=G Right)/;
+    var accelerometerOldAll = /[0-9.-]+(?= [XYZ])/g;
+
     // For each hex code tracked by the etd
     var isEmpty = true;
     for(var code_num = 0; code_num < etd.tracked_codes.length; code_num++) {
@@ -417,7 +445,6 @@ function addTable(etd) {
             var dataDropDownContent = document.createElement("div");
             dataDropDownContent.setAttribute("id", (""+(etd.id+"."+etd.firmware.replace('.', '')+"."+etd.sn+"."+code_num+"-data")));
             dataDropDownContent.setAttribute("class", "hex-dropdown-content");
-            showDataButton.appendChild(dataDropDownContent);
         }
         // Create a table and table header
         var table = document.createElement("table");
@@ -435,12 +462,54 @@ function addTable(etd) {
         header.appendChild(td3);
         header.appendChild(td4);
         table.appendChild(header);
+        //This is lances addition - this doesnt make sense to me haha - keefer
         var lastDate = new Date();
         lastDate.setYear(100);
+        //Holing the current page number for pagination
+        var currentClassNumber = 0;
+        var nextPageButton = $(document.createElement("button"));
+        var prevPageButton = $(document.createElement("button"));
+        var pageNumberHTMLDescription = $(document.createElement("p"));
+        var maxPageNumberHTMLDescription = $(document.createElement("span"));
+        var pageControlHolder = $(document.createElement("div"));
+        pageControlHolder.addClass("pageControlHolder");
+        nextPageButton.attr("code",tracked_code.code);
+        prevPageButton.attr("code",tracked_code.code);
+        pageNumberHTMLDescription.attr("style","display:inline-block");
+        maxPageNumberHTMLDescription.attr("style","display:inline-block");
+        pageNumberHTMLDescription.text("Page 1");
+        nextPageButton.attr("currentPage","1");
+        prevPageButton.attr("currentPage","1");
+        prevPageButton.text("Previous Page");
+        nextPageButton.text("Next Page");
+        nextPageButton.addClass("nextPageButton");
+        pageNumberHTMLDescription.append(maxPageNumberHTMLDescription);
+        
         // For each log of the tracked code
+        if(graphable){
+            $(dataDropDownContent).append(pageControlHolder);
+            $(pageControlHolder).append(prevPageButton);
+            $(pageControlHolder).append(pageNumberHTMLDescription);
+            $(pageControlHolder).append(nextPageButton);
+        }else{
+            $(hexDropdownContent).append(pageControlHolder);
+            $(pageControlHolder).append(prevPageButton);
+            $(pageControlHolder).append(pageNumberHTMLDescription);
+            $(pageControlHolder).append(nextPageButton);
+        }
         for(var log_num = 0; log_num < tracked_code.logs.length; log_num++) {
             // Create a table row
             var row = document.createElement("tr");
+            //Zero works, so first index is 1
+            if(log_num%pageResultCount === 0){
+                currentClassNumber++;
+            }
+            //We want to show the first row
+            if(currentClassNumber !== 1){
+                row.setAttribute("style","display:none");
+            }
+            //Setting the class up for display swapping
+            row.setAttribute("class",tracked_code.code + "-" + currentClassNumber);
             var values = tracked_code.logs[log_num].split('\t');
             td1 = document.createElement("td");
             td2 = document.createElement("td");
@@ -450,7 +519,6 @@ function addTable(etd) {
             td2.appendChild(document.createTextNode(values[1]));
             td3.appendChild(document.createTextNode(values[2]));
             td4.appendChild(document.createTextNode(values[3]));
-
             if(graphable) {
                 //-----------------------Graphing------------------------------//
                 /*we start with the regex commands which need to be unique to each
@@ -460,10 +528,6 @@ function addTable(etd) {
                 */
                 //Date Formatting
                 document.getElementById("status").innerHTML = "Making graphs...";
-                var yearRegex = /[0-9]{4}/;
-                var monthRegex = /[a-zA-Z]+/;
-                var dayRegex = /^[0-9]{1,2}/;
-                var timeRegex = /[0-9]{2}:[0-9]{2}:[0-9]{2}/;
                 var yearRegexMatch = yearRegex.exec(values[0]);
                 var monthRegexmatch = monthRegex.exec(values[0]);
                 var dayRegexmatch = dayRegex.exec(values[0]);
@@ -471,7 +535,7 @@ function addTable(etd) {
                 var month = changeMonthtoNumber(monthRegexmatch[0]);
                 var date;
                 try {
-                    if (monthRegexmatch[0] !== null && dayRegexmatch[0] !== null && timeRegexmatch[0] !== null && yearRegexMatch[0]) {
+                    if (monthRegexmatch.length !== 0 && dayRegexmatch.length !== 0 && timeRegexmatch.length !== 0 && yearRegexMatch.length !== 0) {
                         date = new Date(yearRegexMatch[0] + "/" + month + "/" + dayRegexmatch[0] + " " + timeRegexmatch);
                         if(lastDate !== null){
                             //Added an offeset of 6 hours for the time to be off, this prevents very small errors from showing the message
@@ -489,18 +553,6 @@ function addTable(etd) {
                     continue;
                 }
                 lastDate = date;
-                var batteryRegex = /(?:Info, )([0-9.]+(?=V))/;
-                var batteryRegex2 = /(?:Battery V, )([0-9.]+(?=V))/;
-                var temperatureRegex = /[-]*[0-9.]+(?=F)/;
-                var turbVRegex = /(?:Turbine V, )([0-9.]+(?=V))/;
-                var pressureRegex = /[0-9.]+(?=PSI)/;
-                var rpmRegex = /[0-9.]+(?=RPM)/;
-                var threeVoltRegex = /(?:3.3 Rail V, )([0-9.]+(?=V))/;
-                var fiveVoltRegex = /(?:5.0 Rail V, )([0-9.]+(?=V))/;
-                var zeroX100 = /(?:Pressure = )([0-9]+)/;
-                var pluggedIn = /Charger Plugged In/;
-                var highImpact = /ABUSE DETECTED - HIGH IMPACT/;
-                var freeFall = /ABUSE DETECTED - FREEFALL/;
                 //We systematically regex check the values to see if it corresponds to a type
                 function pushMatches(regex, date, string, graphName, dataset) {
                     var match = regex.exec(string);
@@ -513,7 +565,66 @@ function addTable(etd) {
                         }
                     }
                 }
-                if (typegraph === ""){
+                //special handling for a code that has multiple value types
+                if(tracked_code.code === "0x12C"){
+                    var resultArray = [];
+                    //Pushing the date here because it will need to be pushed before any of the function calls
+                    resultArray.push(date);
+                    function getNewAccelerometerData(){
+                        var newDownMatch = accelerometerNewDown.exec(values[3]);
+                        var newUpMatch = accelerometerNewUp.exec(values[3]);
+                        var newFrontMatch = accelerometerNewFront.exec(values[3]);
+                        var newBackMatch = accelerometerNewBack.exec(values[3]);
+                        var newLeftMatch = accelerometerNewLeft.exec(values[3]);
+                        var newRightMatch = accelerometerNewRight.exec(values[3]);
+                        if(newDownMatch !== null){
+                            resultArray.push(parseFloat(newDownMatch) * -1);
+                        }else if(newUpMatch !== null){
+                            resultArray.push(parseFloat(newUpMatch));
+                        }
+                        if(newFrontMatch !== null){
+                            resultArray.push(parseFloat(newFrontMatch));
+                        }else if(newBackMatch !== null){
+                            resultArray.push(parseFloat(newBackMatch) * -1);
+                        }
+                        if(newLeftMatch !== null){
+                            resultArray.push(parseFloat(newLeftMatch) * -1);
+                            //returning true here because we can, and it will set the graphtype without
+                            //extra checking of array size
+                            return true;
+                        }else if(newRightMatch !== null){
+                            resultArray.push(parseFloat(newRightMatch));
+                            //returning true here because we can, and it will set the graphtype without
+                            //extra checking of array size
+                            return true;
+                        }
+                    }
+                    function getOldAccelerometerData(){
+                        var allMatch = values[3].match(accelerometerOldAll);
+                        var flag = false;
+                        for(var x = 0;x<allMatch.length;x++){
+                            //conversion factor of /50 since 50=1G with old sensors
+                            resultArray.push((parseFloat(allMatch[x])/128)*2.3);
+                            flag = true;
+                        }
+                        return flag;
+                    }
+                    if(typegraph === ""){
+                        if(getNewAccelerometerData()){
+                            typegraph = "newAccelerometer";
+                        }
+                        else if(getOldAccelerometerData()){
+                            typegraph = "oldAccelerometer";
+                        }
+                    }else if(typegraph === "newAccelerometer"){
+                        getNewAccelerometerData();
+                    }else if(typegraph === "oldAccelerometer"){
+
+                        getOldAccelerometerData();
+                    }
+                    accelerometerData.push(resultArray);
+                }
+                else if (typegraph === ""){
                     var match = pluggedIn.exec(values[3]);
                     if (match !== null) {
                         pluggedInData.push([date,1]);
@@ -571,12 +682,76 @@ function addTable(etd) {
             row.appendChild(td4);
             table.appendChild(row);
         }
+        if(currentClassNumber === 1){
+            if(graphable){
+                nextPageButton.remove();
+                prevPageButton.remove();
+                pageNumberHTMLDescription.remove();
+                maxPageNumberHTMLDescription.remove();
+            }else{
+                nextPageButton.remove();
+                prevPageButton.remove();
+                pageNumberHTMLDescription.remove();
+                maxPageNumberHTMLDescription.remove();
+            }
+        }
+
+        //Previous page button handler, it is down here because we need to know the max page number
+        prevPageButton.on("click",function(){
+            var current = $(this);
+            var currentPage = current.next().next().attr("currentPage")
+            var currentCode = current.attr('code');
+            var currentPageHTML = $("." + currentCode + "-" + currentPage);
+            var prevPageHTML = $("." + currentCode + "-" + (-1 + +currentPage))
+            if(prevPageHTML.length === 0){
+                current.next().next().attr('currentPage',currentClassNumber);
+                prevPageHTML = $("." + currentCode + "-" + currentClassNumber);
+                currentPageHTML.attr("style","display:none");
+                prevPageHTML.attr("style","display:table row");
+                var oldChildren = current.next().children();
+                current.next().text("Page " + currentClassNumber);
+                current.next().append(oldChildren);
+            }else{
+                currentPageHTML.attr("style","display:none");
+                prevPageHTML.attr("style","display:table row");
+                current.next().next().attr('currentPage',-1 + +current.next().next().attr("currentPage"));
+                var oldChildren = current.next().children();
+                current.next().text("Page " + (-1 + +currentPage));
+                current.next().append(oldChildren);
+            }
+            console.log("." + currentCode + "-" + currentPage);
+        });
+        //Next page button handler, it is down here because previous has to be down here
+        nextPageButton.on("click",function(){
+            var current = $(this);
+            var currentPage = current.attr("currentPage")
+            var currentCode = current.attr('code');
+            var currentPageHTML = $("." + currentCode + "-" + currentPage);
+            var nextPageHTML = $("." + currentCode + "-" + (1 + +currentPage))
+            if(nextPageHTML.length === 0){
+                current.attr('currentPage',"1");
+                nextPageHTML = $("." + currentCode + "-" + 1);
+                currentPageHTML.attr("style","display:none");
+                nextPageHTML.attr("style","display:table row");
+                var oldChildren = current.prev().children();
+                current.prev().text("Page " +1);
+                current.prev().append(oldChildren);
+            }else{
+                currentPageHTML.attr("style","display:none");
+                nextPageHTML.attr("style","display:table row");
+                current.attr('currentPage',1 + +current.attr("currentPage"));
+                var oldChildren = current.prev().children();
+                current.prev().text("Page " + (1 + +currentPage));
+                current.prev().append(oldChildren);
+            }
+            console.log("." + currentCode + "-" + currentPage);
+        });
         /*For each of the if and else if statements we make sure that the graph type (or regex that matched)
           is of the correct type to make the graph, we then make a div and set up its attributes
           Finally we add an event listener to redraw the graph when you click on the graphs table button
         */
         if(graphable){
-            if(tempData[0] !== null) {
+            if(tempData.length !== 0) {
                 if (typegraph === "temperature") {
                     if(outOfOrder){
                         if(!doNotSort){
@@ -588,7 +763,7 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:red;")
                 }
             }
-            if(turbVData[0] !== null) {
+            if(turbVData.length !== 0) {
                 if (typegraph === "turbineVoltage") {
                     if(outOfOrder){
                         if(!doNotSort){
@@ -600,7 +775,7 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:blue;")
                 }
             }
-            if(batteryData[0] !== null) {
+            if(batteryData.length !== 0) {
                 if (typegraph === "battery1" || typegraph === "battery2") {
                     if(outOfOrder){
                         if(!doNotSort) {
@@ -612,7 +787,7 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:green;")
                 }
             }
-            if(pressureData[0] !== null) {
+            if(pressureData.length !== 0) {
                 if (typegraph === "pressure") {
                     if(outOfOrder){
                         if(!doNotSort) {
@@ -624,7 +799,7 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:purple;")
                 }
             }
-            if(pressureData[0] !== null) {
+            if(pressureData.length !== 0) {
                 if (typegraph === "pressure2") {
                     if(outOfOrder){
                         if(!doNotSort) {
@@ -636,7 +811,7 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:purple;")
                 }
             }
-            if(rpmData[0] !== null){
+            if(rpmData.length !== 0){
                 if(typegraph === "rpm"){
                     if(outOfOrder){
                         if(!doNotSort) {
@@ -672,7 +847,7 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:grey;")
                 }
             }
-            if(pluggedInData[0] !== null){
+            if(pluggedInData.length !== 0){
                 if(typegraph === "pluggedIn"){
                     if(outOfOrder){
                         if(!doNotSort) {
@@ -708,14 +883,49 @@ function addTable(etd) {
                     showDataButton.setAttribute("style","background-color:red;")
                 }
             }
+            if(accelerometerData.length !== 0){
+                console.log("Accelerometer check passed")
+                console.log(accelerometerData);
+                if(outOfOrder){
+                    if(!doNotSort) {
+                        console.log("Sorting");
+                        freeFallData = totalHeapSort(freeFallData);
+                    }
+                }
+                var newgraph = document.createElement("div");
+                newgraph.setAttribute("id", "graphdiv-" + name);
+                newgraph.style.width = "100%";
+                newgraph.style.color = "black";
+                newgraph.style.backgroundColor = "white";
+                hexDropdownContent.appendChild(newgraph);
+                var nGraph = new Dygraph(
+                newgraph,
+                accelerometerData, {
+                    legend: 'always',
+                    title: name,
+                    showRoller: true,
+                    labels: ["x","Up-Down","Front-Back","Left-Right"],
+                    strokeWidth: .7,
+                    colors: ["gold","red","blue"],
+                    drawPoints: true
+                }
+                );
+                hexButton.addEventListener("click", function () {
+                    nGraph.resize();
+                });
+                graphSet.push(nGraph);
+            }
             hexDropdownContent.appendChild(showDataButton);
             dataDropDownContent.appendChild(table);
         }else{
             hexDropdownContent.appendChild(table)
         }
+        maxPageNumberHTMLDescription.html("&nbsp;of " + currentClassNumber);
         hexDropdown.appendChild(hexDropdownContent);
         etdDropdownContent.appendChild(hexDropdown);
+        $(hexDropdownContent).append(dataDropDownContent);
         //reassigning data back to nothing, as the graph was already made
+        accelerometerData = [];
         pluggedInData = [];
         tempData = [];
         batteryData = [];
@@ -771,37 +981,40 @@ function makegraph(data,name,color,yaxisLabel,strokeWidth,parent,dropdown) {
 //returns true if code is a graphable type - Such as battery voltage, board temp etc.
 function isGraphable(hex){
     if(hex == "0x10B"){
-        return true
+        return true;
     }
     if(hex === "0x114"){
-        return true
+        return true;
     }
     if(hex === "0x115"){
-        return true
+        return true;
     }
     if(hex === "0x11A"){
-        return true
+        return true;
     }
     if(hex === "0x11B"){
-        return true
+        return true;
     }
     if(hex === "0x10A"){
-        return true
+        return true;
+    }
+    if(hex === "0x12C"){
+        return true;
     }
     if(hex === "0x138"){
-        return true
+        return true;
     }
     if(hex === "0x139"){
-        return true
+        return true;
     }
     if(hex === "0x100"){
-        return true
+        return true;
     }
     if(hex==="0x13B"){
-        return true
+        return true;
     }
     if(hex==="0x13C"){
-        return true
+        return true;
     }
     return false;
 }
@@ -990,6 +1203,9 @@ function loadOptions(etd) {
     if(document.querySelector('input[value="0x11B"]').checked) {
         etd.addCode("0x11B");
     }
+    if(document.querySelector('input[value="0x12C"]').checked) {
+        etd.addCode("0x12C");
+    }
     if(document.querySelector('input[value="0x138"]').checked) {
         etd.addCode("0x138");
     }
@@ -1092,7 +1308,7 @@ function chronCompare(a, b) {
                 return -1;
             }
             if (bMonth < aMonth) {
-                return 1
+                return 1;
             }
         }
     }
