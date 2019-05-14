@@ -3,6 +3,7 @@ var reader = new FileReader();
 var pageResultCount = 1000;
 //If true, sorting does not take place
 var doNotSort = false;
+var results = document.createElement("div");
 function readFiles(files) {
     etd_list = [];
     var index = 0;
@@ -38,6 +39,8 @@ function readFiles(files) {
                 for (var i = 0; i < etd_list.length; i++) {
                     addTable(etd_list[i]);
                 }
+                var resultPanel = document.getElementById("results-panel");
+                resultPanel.appendChild(results);
                 document.getElementById("status").innerHTML = "Done";
                 document.getElementById("grid-input-panel").style.backgroundColor = "#4CAF50";
                 toggleDropdown("options-dropdown-content");
@@ -53,7 +56,9 @@ function readFiles(files) {
         document.getElementById("status").innerHTML = "Loading files...";
         files = [].slice.call(files).sort(chronCompare);
         document.getElementById("status").innerHTML = "Parsing files...";
-        reader.readAsText(files[0]);
+        //reader.readAsText(files[0]);
+        let fileWorker = new Worker("js/file_worker.js");
+        fileWorker.postMessage(files);
     }
 }
 //Heap sort function - this seemed like the best way to sort the data if needed
@@ -950,8 +955,7 @@ function addTable(etd) {
         });
     }
     etdDropdown.appendChild(etdDropdownContent);
-    var element = document.getElementById("results-panel");
-    element.appendChild(etdDropdown);
+    results.appendChild(etdDropdown);
 }
 function makegraph(data,name,color,yaxisLabel,strokeWidth,parent,dropdown) {
     var newgraph = document.createElement("div");
