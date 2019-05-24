@@ -5,60 +5,56 @@ var pageResultCount = 1000;
 var doNotSort = false;
 var results = document.createElement("div");
 function readFiles(files) {
+    //initialize the etd list
     etd_list = [];
-    var index = 0;
-    reader.onerror =
-        function () {
-            console.log("reading operation encountered an error");
-            document.getElementById("status").innerHTML = "Error reading file";
-            document.getElementById("grid-input-panel").style.backgroundColor = "#F44336";
-        };
-    reader.onabort =
-        function () {
-            console.log("Reading operation aborted.");
-            document.getElementById("status").innerHTML = "Aborted reading file";
-            document.getElementById("grid-input-panel").style.backgroundColor = "#F44336";
-        };
-    reader.onloadstart =
-        function () {
-        };
-    reader.onload =
-        function () {
-            console.log("parsed file " + (index+1) + "/" + files.length);
-            //Progress bar handler - maybe swap to an animation style but this works fine
-            var multiplier = 100/files.length;
-            var currentPercent = multiplier * (index+1);
-            document.getElementById("grid-input-panel").setAttribute("style","background: linear-gradient(to right, " +
+    //If files are present
+    if (files.length > 0) {
+        document.getElementById("status").innerHTML = "Loading files...";
+        //Sort files by date
+        files = [].slice.call(files).sort(chronCompare);
+        document.getElementById("status").innerHTML = "Parsing files...";
+        //Initialize a webworker to read files
+        let fileWorker = new Worker("js/file_worker.js");
+        fileWorker.postMessage(files);
+        //when message is received from file reader
+        fileWorker.onmessage = function(message){
+            //If it is a data update
+            if (message.data.status == "data"){
+                var multiplier = 100/files.length;
+                var currentPercent = multiplier * (message.data.progress+1);
+                console.log("parsed file " + (message.data.progress+1) + "/" + files.length);
+                //Progress bar handler - maybe swap to an animation style but this works fine
+                document.getElementById("grid-input-panel").setAttribute("style","background: linear-gradient(to right, " +
                 " #4CAF50 0%,#4CAF50 "+currentPercent+"%,#424242 "+(currentPercent-1)+"%,#424242 100%);");
-            etd_list = parseETDFile(reader, etd_list);
-            if (index + 1 < files.length) {
-                reader.readAsText(files[++index]);
-            } else {
-                document.getElementById("results-panel").innerHTML = "";
-                console.log("parsed " + etd_list.length + " unique ETDs");
+                parseETDFile(e.data.data,etd_list);
+            //If its the last update
+            }else if(message.data.status == "last"){
                 for (var i = 0; i < etd_list.length; i++) {
                     addTable(etd_list[i]);
                 }
                 var resultPanel = document.getElementById("results-panel");
-                resultPanel.appendChild(results);
+                var reparseButton = document.getElementById("reparse");
+                reparseButton.style.display = "inherit";
                 document.getElementById("status").innerHTML = "Done";
                 document.getElementById("grid-input-panel").style.backgroundColor = "#4CAF50";
                 toggleDropdown("options-dropdown-content");
-                var reparseButton = document.getElementById("reparse");
-                reparseButton.style.display = "inherit";
+                resultPanel.appendChild(results);
                 reparseButton.addEventListener("click",function(){readFiles(files);});
+            //If it is an error update
+            }else if(message.data.status == "error"){
+                console.log("reading operation encountered an error");
+                document.getElementById("status").innerHTML = "Error reading file";
+                document.getElementById("grid-input-panel").style.backgroundColor = "#F44336";
+            //If it is an abort update
+            }else if(message.data.status == "abort"){
+                console.log("Reading operation aborted.");
+                document.getElementById("status").innerHTML = "Aborted reading file";
+                document.getElementById("grid-input-panel").style.backgroundColor = "#F44336";
             }
-        };
-    reader.onloadend =
-        function () {
-        };
-    if (files.length > 0) {
-        document.getElementById("status").innerHTML = "Loading files...";
-        files = [].slice.call(files).sort(chronCompare);
-        document.getElementById("status").innerHTML = "Parsing files...";
-        //reader.readAsText(files[0]);
-        let fileWorker = new Worker("js/file_worker.js");
-        fileWorker.postMessage(files);
+        }
+    }else{
+        document.getElementById("status").innerHTML = "No files selected";
+        document.getElementById("grid-input-panel").setAttribute("style","background-color: #424242;");
     }
 }
 //Heap sort function - this seemed like the best way to sort the data if needed
@@ -1118,11 +1114,12 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
     };
     return obj;
 }
-function parseETDFile(reader, etd_list) {
+
+function parseETDFile(data, etd_list) {
     if(!etd_list) {
         etd_list = [];
     }
-    var lines = reader.result.split("\n");
+    var lines = data.split("\n");
     var line;
     var this_etd;
     for (var line_num = 0; line_num < lines.length-1; line_num++) {
