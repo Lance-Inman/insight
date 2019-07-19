@@ -1,5 +1,8 @@
 let decoder = new TextDecoder("utf-8");
 var fr = new FileReader();
+onmessage = function(e){
+    readFile(e.data);
+}
 function readFile(files){
     if(files.length > 0){
         let current_index = 0;
@@ -25,5 +28,7 @@ function readFile(files){
             postMessage({status:"abort"});
         }
         fr.readAsArrayBuffer(files[current_index]);
+    }else{
+        console.log("File length not greater than 0")
     }
 }
