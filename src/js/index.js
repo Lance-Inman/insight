@@ -3,57 +3,58 @@ var reader = new FileReader();
 var pageResultCount = 1000;
 //If true, sorting does not take place
 var doNotSort = false;
+var results = document.createElement("div");
 function readFiles(files) {
+    //initialize the etd list
     etd_list = [];
-    var index = 0;
-    reader.onerror =
-        function () {
-            console.log("reading operation encountered an error");
-            document.getElementById("status").innerHTML = "Error reading file";
-            document.getElementById("grid-input-panel").style.backgroundColor = "#F44336";
-        };
-    reader.onabort =
-        function () {
-            console.log("Reading operation aborted.");
-            document.getElementById("status").innerHTML = "Aborted reading file";
-            document.getElementById("grid-input-panel").style.backgroundColor = "#F44336";
-        };
-    reader.onloadstart =
-        function () {
-        };
-    reader.onload =
-        function () {
-            console.log("parsed file " + (index+1) + "/" + files.length);
-            //Progress bar handler - maybe swap to an animation style but this works fine
-            var multiplier = 100/files.length;
-            var currentPercent = multiplier * (index+1);
-            document.getElementById("grid-input-panel").setAttribute("style","background: linear-gradient(to right, " +
+    //If files are present
+    if (files.length > 0) {
+        document.getElementById("status").innerHTML = "Loading files...";
+        //Sort files by date
+        files = [].slice.call(files).sort(chronCompare);
+        document.getElementById("status").innerHTML = "Parsing files...";
+        //Initialize a webworker to read files
+        let fileWorker = new Worker("js/file_worker.js");
+        fileWorker.postMessage(files);
+        //when message is received from file reader
+        fileWorker.onmessage = function(message){
+            //If it is a data update
+            if (message.data.status == "data"){
+                var multiplier = 100/files.length;
+                var currentPercent = multiplier * (message.data.progress+1);
+                console.log("parsed file " + (message.data.progress+1) + "/" + files.length);
+                //Progress bar handler - maybe swap to an animation style but this works fine
+                document.getElementById("grid-input-panel").setAttribute("style","background: linear-gradient(to right, " +
                 " #4CAF50 0%,#4CAF50 "+currentPercent+"%,#424242 "+(currentPercent-1)+"%,#424242 100%);");
-            etd_list = parseETDFile(reader, etd_list);
-            if (index + 1 < files.length) {
-                reader.readAsText(files[++index]);
-            } else {
-                document.getElementById("results-panel").innerHTML = "";
-                console.log("parsed " + etd_list.length + " unique ETDs");
+                parseETDFile(message.data.data,etd_list);
+            //If its the last update
+            }else if(message.data.status == "last"){
                 for (var i = 0; i < etd_list.length; i++) {
                     addTable(etd_list[i]);
                 }
+                var resultPanel = document.getElementById("results-panel");
+                var reparseButton = document.getElementById("reparse");
+                reparseButton.style.display = "inherit";
                 document.getElementById("status").innerHTML = "Done";
                 document.getElementById("grid-input-panel").style.backgroundColor = "#4CAF50";
                 toggleDropdown("options-dropdown-content");
-                var reparseButton = document.getElementById("reparse");
-                reparseButton.style.display = "inherit";
+                resultPanel.appendChild(results);
                 reparseButton.addEventListener("click",function(){readFiles(files);});
+            //If it is an error update
+            }else if(message.data.status == "error"){
+                console.log("reading operation encountered an error");
+                document.getElementById("status").innerHTML = "Error reading file";
+                document.getElementById("grid-input-panel").style.backgroundColor = "#F44336";
+            //If it is an abort update
+            }else if(message.data.status == "abort"){
+                console.log("Reading operation aborted.");
+                document.getElementById("status").innerHTML = "Aborted reading file";
+                document.getElementById("grid-input-panel").style.backgroundColor = "#F44336";
             }
-        };
-    reader.onloadend =
-        function () {
-        };
-    if (files.length > 0) {
-        document.getElementById("status").innerHTML = "Loading files...";
-        files = [].slice.call(files).sort(chronCompare);
-        document.getElementById("status").innerHTML = "Parsing files...";
-        reader.readAsText(files[0]);
+        }
+    }else{
+        document.getElementById("status").innerHTML = "No files selected";
+        document.getElementById("grid-input-panel").setAttribute("style","background-color: #424242;");
     }
 }
 //Heap sort function - this seemed like the best way to sort the data if needed
@@ -95,268 +96,101 @@ function totalHeapSort(input){
     heapSort(array);
     return array;
 }
-
+let hexMap = {
+    "0x1":"Real Time Clock Not Set",
+    "0x2":"Micro SD Card Not Installed",
+    "0x3":"Brake Solenoid Not Connected",
+    "0x4":"Pressure Transducer Not Connected",
+    "0x5":"HVM Failure",
+    "0x6":"GPS Not Connected That Should Be",
+    "0x7":"LIS302 Accelerometer Not Present Led Code",
+    "0x8":"Real Time Clock Not Functioning",
+    "0x9":"HDSP2502 Display Failure",
+    "0xA":"LM74CIM Temp Sensor Not Present",
+    "0xB":"Voltage 3.3 Out Of Tolerance",
+    "0xC":"Voltage 5.0 Out Of Tolerance",
+    "0xD":"Voltage 12.0 Out Of Tolerance",
+    "0xE":"Brake Solenoid Failed During Blow",
+    "0xF":"Turbine Not Spinning",
+    "0x10":"Turbine RPM Varying Too Much",
+    "0x11":"Turbine RPM Out Of Spec VS Pressure",
+    "0x12":"Turbine Voltage Out Of Spec VS RPM",
+    "0x13":"CMX469 Modem Not Present",
+    "0x14":"Charger Failure",
+    "0x15":"Radio Not Connected",
+    "0x16":"CPLD Not Present or Not Programmed",
+    "0x17":"Micro SD Card Corrupted",
+    "0x1D":"12.0 Voltage out of Tolerance",
+    "0x100":"0x100 Pressure Data",
+    "0x101":"Power On From Sleep Event",
+    "0x102":"Power On From Reset Event",
+    "0x103":"Power Down From Battery Low Event",
+    "0x104":"Power Down From Layed On Side Event",
+    "0x105":"E Brake Blow From Two Perfect Packets Event",
+    "0x106":"E Brake Blow From One Perfect And One Corrected Packet Event",
+    "0x107":"E Brake Blow From One Perfect Packet Event",
+    "0x108":"E Brake Blow From Two Corrected Packets Event",
+    "0x109":"E Brake Blow From One Corrected Packet Event",
+    "0x10A":"Temperature Info Event",
+    "0x10B":"External Charger Plugged In Event",
+    "0x10C":"Kickstart Circuit Activated Event",
+    "0x10D":"ETD Entered Bench Mode Event",
+    "0x10E":"ETD Plugged into RS232 Event",
+    "0x10F":"Turbine Beyond 10000 RPM Event",
+    "0x110":"Good Received Packet Event",
+    "0x111":"In Motion Event",
+    "0x8111":"Motion Went Away Event",
+    "0x112":"Marker Turning On Event",
+    "0x113":"Arm Request Event",
+    "0x114":"Battery Voltage Info Event",
+    "0x115":"Turbine Voltage Info Event",
+    "0x116":"Follow Up Data Event",
+    "0x117":"Power Down From Button Hold Event",
+    "0x118":"Charge Completion Event",
+    "0x119":"Power On From Watchdog Reset Event",
+    "0x11A":"Pressure Info Event",
+    "0x11B":"RPM Info Event",
+    "0x11C":"Power Down From No Air Event",
+    "0x11D":"Power Down From Charger Unplugged Event",
+    "0x11E":"Coordinate Info Event",
+    "0x11F":"GPS Doesn't See Satellite",
+    "0x120":"Radio Receive Event",
+    "0x121":"Radio Power level Set Too High",
+    "0x122":"Power Down From RTC GPS Update Event",
+    "0x123":"Power Down From Unit Disable",
+    "0x124":"Turbine Hours Cleared Event",
+    "0x125":"Battery Hours Cleared Event",
+    "0x126":"Location Update Sent In Event",
+    "0x127":"RTC Updated From GPS Time Event",
+    "0x128":"Radio Power Enabled Event",
+    "0x129":"GPS Power Enabled Event",
+    "0x12A":"Energy Conservation Mode Event",
+    "0x12B":"Location Update Failed Event",
+    "0x12C":"Accelerometer Info Event",
+    "0x12D":"Radio Power Disabled Event",
+    "0x12E":"Over PSI Event",
+    "0x12F":"Emergency Dump Battery Load test Results Event",
+    "0x130":"Charger Shutdown From Over Temperature PCB Event",
+    "0x131":"Energy Conservation Enable Reason",
+    "0x132":"Energy Conservation Disable Reason",
+    "0x133":"GPS Cell Info Event",
+    "0x134":"Turbine Shutoff Event",
+    "0x135":"Arm Button Pressed Event",
+    "0x136":"Battery Voltage Dropped Too Far After Charge Disable",
+    "0x137":"Battery Voltage Started Too High",
+    "0x138":"3.3 Rail Voltage Info Event",
+    "0x139":"5.0 Rail Voltage Info Event",
+    "0x13A":"GPS Detected Event",
+    "0x13B":"Abuse Detected Freefall Event",
+    "0x13C":"Abuse Detected High Impact Event",
+}
 //If you pass in a string of the hex code it will return what the hex code means in plain english
 function hexToText(hex){
-    if(hex === "0x1"){
-        return "Real Time Clock Not Set";
+    if(hexMap[hex] != undefined){
+        return hexMap[hex]
+    }else{
+        return null
     }
-    if(hex === "0x2"){
-        return "Micro SD Card Not Installed";
-    }
-    if(hex === "0x3"){
-        return "Brake Solenoid Not Connected";
-    }
-    if(hex === "0x4"){
-        return "Pressure Transducer Not Connected";
-    }
-    if(hex === "0x5"){
-        return "HVM Failure";
-    }
-    if(hex === "0x6"){
-        return "GPS Not Connected That Should Be";
-    }
-    if(hex === "0x7"){
-        return "LIS302 Accelerometer Not Present Led Code";
-    }
-    if(hex === "0x8"){
-        return "Real Time Clock Not Functioning";
-    }
-    if(hex === "0x9"){
-        return "HDSP2502 Display Failure";
-    }
-    if(hex === "0xA"){
-        return "LM74CIM Temp Sensor Not Present";
-    }
-    if(hex === "0xB"){
-        return "Voltage 3.3 Out Of Tolerance";
-    }
-    if(hex === "0xC"){
-        return "Voltage 5.0 Out Of Tolerance";
-    }
-    if(hex === "0xD"){
-        return "Voltage 12.0 Out Of Tolerance";
-    }
-    if(hex === "0xE"){
-        return "Brake Solenoid Failed During Blow";
-    }
-    if(hex === "0xF"){
-        return "Turbine Not Spinning";
-    }
-    if(hex === "0x10"){
-        return "Turbine RPM Varying Too Much";
-    }
-    if(hex === "0x11"){
-        return "Turbine RPM Out Of Spec VS Pressure";
-    }
-    if(hex === "0x12"){
-        return "Turbine Voltage Out Of Spec VS RPM";
-    }
-    if(hex === "0x13"){
-        return "CMX469 Modem Not Present";
-    }
-    if(hex === "0x14"){
-        return "Charger Failure";
-    }
-    if(hex === "0x15"){
-        return "Radio Not Connected";
-    }
-    if(hex === "0x16"){
-        return "CPLD Not Present or Not Programmed";
-    }
-    if(hex === "0x17"){
-        return "Micro SD Card Corrupted";
-    }
-    if(hex === "0x1D") {
-        return "12.0 Voltage out of Tolerance";
-    }
-    if(hex === "0x100"){
-        return "0x100 Pressure Data";
-    }
-    if(hex === "0x101"){
-        return "Power On From Sleep Event";
-    }
-    if(hex === "0x102"){
-        return "Power On From Reset Event";
-    }
-    if(hex === "0x103"){
-        return "Power Down From Battery Low Event";
-    }
-    if(hex === "0x104"){
-        return "Power Down From Layed On Side Event";
-    }
-    if(hex === "0x105"){
-        return "E Brake Blow From Two Perfect Packets Event";
-    }
-    if(hex === "0x106"){
-        return "E Brake Blow From One Perfect And One Corrected Packet Event";
-    }
-    if(hex === "0x107"){
-        return "E Brake Blow From One Perfect Packet Event";
-    }
-    if(hex === "0x108"){
-        return "E Brake Blow From Two Corrected Packets Event";
-    }
-    if(hex === "0x109"){
-        return "E Brake Blow From One Corrected Packet Event";
-    }
-    if(hex === "0x10A"){
-        return "Temperature Info Event";
-    }
-    if(hex === "0x10B"){
-        return "External Charger Plugged In Event";
-    }
-    if(hex === "0x10C"){
-        return "Kickstart Circuit Activated Event";
-    }
-    if(hex === "0x10D"){
-        return "ETD Entered Bench Mode Event";
-    }
-    if(hex === "0x10E"){
-        return "ETD Plugged into RS232 Event";
-    }
-    if(hex === "0x10F"){
-        return "Turbine Beyond 10000 RPM Event";
-    }
-    if(hex === "0x110"){
-        return "Good Received Packet Event";
-    }
-    if(hex === "0x111"){
-        return "In Motion Event";
-    }
-    if(hex === "0x8111") {
-        return "Motion Went Away Event";
-    }
-    if(hex === "0x112"){
-        return "Marker Turning On Event";
-    }
-    if(hex === "0x113"){
-        return "Arm Request Event";
-    }
-    if(hex === "0x114"){
-        return "Battery Voltage Info Event";
-    }
-    if(hex === "0x115"){
-        return "Turbine Voltage Info Event";
-    }
-    if(hex === "0x116"){
-        return "Follow Up Data Event";
-    }
-    if(hex === "0x117"){
-        return "Power Down From Button Hold Event";
-    }
-    if(hex === "0x118"){
-        return "Charge Completion Event";
-    }
-    if(hex === "0x119"){
-        return "Power On From Watchdog Reset Event";
-    }
-    if(hex === "0x11A"){
-        return "Pressure Info Event";
-    }
-    if(hex === "0x11B"){
-        return "RPM Info Event";
-    }
-    if(hex === "0x11C"){
-        return "Power Down From No Air Event";
-    }
-    if(hex === "0x11D"){
-        return "Power Down From Charger Unplugged Event";
-    }
-    if(hex === "0x11E"){
-        return "Coordinate Info Event";
-    }
-    if(hex === "0x11F"){
-        return "GPS Doesn't See Satellite";
-    }
-    if(hex === "0x120"){
-        return "Radio Receive Event";
-    }
-    if(hex === "0x121"){
-        return "Radio Power level Set Too High";
-    }
-    if(hex === "0x122"){
-        return "Power Down From RTC GPS Update Event";
-    }
-    if(hex === "0x123"){
-        return "Power Down From Unit Disable";
-    }
-    if(hex === "0x124"){
-        return "Turbine Hours Cleared Event";
-    }
-    if(hex === "0x125"){
-        return "Battery Hours Cleared Event";
-    }
-    if(hex === "0x126"){
-        return "Location Update Sent In Event";
-    }
-    if(hex === "0x127"){
-        return "RTC Updated From GPS Time Event";
-    }
-    if(hex === "0x128"){
-        return "Radio Power Enabled Event";
-    }
-    if(hex === "0x129"){
-        return "GPS Power Enabled Event";
-    }
-    if(hex === "0x12A"){
-        return "Energy Conservation Mode Event";
-    }
-    if(hex === "0x12B"){
-        return "Location Update Failed Event";
-    }
-    if(hex === "0x12C"){
-        return "Accelerometer Info Event";
-    }
-    if(hex === "0x12D"){
-        return "Radio Power Disabled Event";
-    }
-    if(hex === "0x12E"){
-        return "Over PSI Event";
-    }
-    if(hex === "0x12F"){
-        return "Emergency Dump Battery Load test Results Event";
-    }
-    if(hex === "0x130"){
-        return "Charger Shutdown From Over Temperature PCB Event";
-    }
-    if(hex === "0x131"){
-        return "Energy Conservation Enable Reason";
-    }
-    if(hex === "0x132"){
-        return "Energy Conservation Disable Reason";
-    }
-    if(hex === "0x133"){
-        return "GPS Cell Info Event";
-    }
-    if(hex === "0x134"){
-        return "Turbine Shutoff Event";
-    }
-    if(hex === "0x135"){
-        return "Arm Button Pressed Event";
-    }
-    if(hex === "0x136"){
-        return "Battery Voltage Dropped Too Far After Charge Disable";
-    }
-    if(hex === "0x137"){
-        return "Battery Voltage Started Too High";
-    }
-    if(hex === "0x138"){
-        return "3.3 Rail Voltage Info Event";
-    }
-    if(hex === "0x139"){
-        return "5.0 Rail Voltage Info Event";
-    }
-    if(hex === "0x13A"){
-        return "GPS Detected Event";
-    }
-    if(hex === "0x13B"){
-        return "Abuse Detected Freefall Event";
-    }
-    if(hex === "0x13C"){
-        return "Abuse Detected High Impact Event";
-    }
-    return null;
 }
 function addTable(etd) {
     // Create a dropdown panel for the etd
@@ -950,8 +784,7 @@ function addTable(etd) {
         });
     }
     etdDropdown.appendChild(etdDropdownContent);
-    var element = document.getElementById("results-panel");
-    element.appendChild(etdDropdown);
+    results.appendChild(etdDropdown);
 }
 function makegraph(data,name,color,yaxisLabel,strokeWidth,parent,dropdown) {
     var newgraph = document.createElement("div");
@@ -978,45 +811,27 @@ function makegraph(data,name,color,yaxisLabel,strokeWidth,parent,dropdown) {
     });
     return nGraph;
 }
+let graphableMap = {
+    "0x10B":true,
+    "0x114":true,
+    "0x115":true,
+    "0x11A":true,
+    "0x11B":true,
+    "0x10A":true,
+    "0x12C":true,
+    "0x138":true,
+    "0x139":true,
+    "0x100":true,
+    "0x13B":true,
+    "0x13C":true,
+}
 //returns true if code is a graphable type - Such as battery voltage, board temp etc.
 function isGraphable(hex){
-    if(hex == "0x10B"){
-        return true;
+    if(graphableMap[hex] != undefined){
+        return graphableMap[hex]
+    }else{
+        return false
     }
-    if(hex === "0x114"){
-        return true;
-    }
-    if(hex === "0x115"){
-        return true;
-    }
-    if(hex === "0x11A"){
-        return true;
-    }
-    if(hex === "0x11B"){
-        return true;
-    }
-    if(hex === "0x10A"){
-        return true;
-    }
-    if(hex === "0x12C"){
-        return true;
-    }
-    if(hex === "0x138"){
-        return true;
-    }
-    if(hex === "0x139"){
-        return true;
-    }
-    if(hex === "0x100"){
-        return true;
-    }
-    if(hex==="0x13B"){
-        return true;
-    }
-    if(hex==="0x13C"){
-        return true;
-    }
-    return false;
 }
 //Changes month passed properly (Such as January with a capital J) to a value coresponding to that month like 01
 function changeMonthtoNumber(month){
@@ -1069,18 +884,15 @@ function createTrackedCode(code) {
     return obj;
 }
 function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_time) {
-    var obj = {};
-    try {
-        obj.id = id.match(/[0-9]{1,5}/)[0];
-        obj.firmware = firmware.match(/[0-9]+.[0-9]+/)[0];
-        obj.cpld = cpld.match(/[0-9]+.[0-9]+/)[0];
-        obj.sn = sn.match(/(?:Processor Board Serial Number: |\G)(\-*[A-Za-z0-9 ]+)/)[1];
-        obj.customer = customer.match(/(?:Customer ID: |\G)([A-Z]+)/)[0];
-        obj.turbine_time = turbine_time.match(/(?:Turbine Time: |\G)([0-9]+.[0-9]+)/)[0];
-        obj.battery_time = battery_time.match(/(?:Battery Time: |\G)([0-9]+.[0-9]+)/)[0];
-    } catch (err) {
-        return null;
-    }
+    var obj = {
+        id: id,
+        firmware: firmware,
+        cpld: cpld,
+        sn: sn,
+        customer: customer,
+        turbine_time: turbine_time,
+        battery_time: battery_time
+    };
     obj.tracked_codes = [];
     obj.addCode = function(code) {
         this.tracked_codes.push(createTrackedCode(code));
@@ -1114,52 +926,222 @@ function createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_ti
     };
     return obj;
 }
-function parseETDFile(reader, etd_list) {
+let etd_header_regex = [
+    {
+        key: 'type',
+        description: "eot",
+        lines_after_header: 1,
+        regex: /^EOT/,
+    },
+    {
+        key: 'id',
+        description: "Unit ID",
+        lines_after_header: 1,
+        regex: /[0-9]{1,5}/,
+        match: 0
+    },
+    {
+        key: 'firmware',
+        description: "Firmware",
+        lines_after_header: 2,
+        regex: /[0-9]+.[0-9]+/,
+        match: 0
+    },
+    {
+        key: 'cpld',
+        description: "CPLD",
+        lines_after_header: 3,
+        regex: /[0-9]+.[0-9]+/,
+        match: 0
+    },
+    {
+        key: 'sn',
+        description: "Serial Number",
+        lines_after_header: 4,
+        regex: /(?:Processor Board Serial Number: |\G)(\-*[A-Za-z0-9 ]+)/,
+        match: 1,
+    },
+    {
+        key: 'customer',
+        description: "Customer",
+        lines_after_header: 5,
+        regex: /(?:Customer ID: |\G)([A-Z]+)/,
+        match: 0
+    },
+    {
+        key: 'turbine_time',
+        description: "Turbine Hours",
+        lines_after_header: 6,
+        regex: /(?:Turbine Time: |\G)([0-9]+.[0-9]+)/,
+        match: 0
+    },
+    {
+        key: 'battery_time',
+        description: "Battery Hours",
+        lines_after_header: 7,
+        regex: /(?:Battery Time: |\G)([0-9]+.[0-9]+)/,
+        match: 0
+    },
+]
+let repeater_header_regex = [
+    {
+        key: 'type',
+        description: "repeater",
+        lines_after_header: 1,
+        regex: /DPS 4040E Repeater/,
+        match: 0
+    },
+    {
+        key: 'firmware',
+        description: "Firmware Version",
+        lines_after_header: 1,
+        regex: /V[0-9]+\.+[0-9]+/,
+        match: 0
+    },
+    {
+        key: 'crc',
+        description: "CRC",
+        lines_after_header: 1,
+        regex: /CRC ([0-9]{1}x[A-F0-9]+)/,
+        match: 1
+    },
+    {
+        key: 'flash_bank',
+        description: "Flash Bank",
+        lines_after_header: 2,
+        regex: /Flash Bank ([0-9]+)/,
+        match: 1
+    },
+    {
+        key: 'flash_bank_name',
+        description: "Flash Bank Name",
+        lines_after_header: 2,
+        regex: /\- (.+)/,
+        match: 1
+    },
+    {
+        key: 'sn',
+        description: "Serial Number",
+        lines_after_header: 3,
+        regex: /Processor Board Serial Number: ([0-9]+)/,
+        match: 1
+    },
+    {
+        key: 'unit',
+        description: "Unit ID",
+        lines_after_header: 4,
+        regex: /UNIT ID: ([0-9]+)/,
+        match: 1
+    },
+    {
+        key: 'customer',
+        description: "Customer",
+        lines_after_header: 5,
+        regex: /Customer ID: ([a-zA-Z]+)/,
+        match: 1
+    },
+    {
+        key: 'heater_control_status',
+        description: "Heater Control Status",
+        lines_after_header: 6,
+        regex: /IS (.+)/,
+        match: 1
+    },
+    {
+        key: 'heater_control_temp',
+        description: "Heater Control Temperature",
+        lines_after_header: 7,
+        regex: /[0-9]+\.[0-9]+F/,
+        match: 0
+    },
+    {
+        key: 'heater_control_hysteresis',
+        description: "Heater Control Hysteresis",
+        lines_after_header: 8,
+        regex: /[0-9]+\.[0-9]+F/,
+        match: 0
+    },
+]
+function parseETDFile(data, etd_list) {
     if(!etd_list) {
         etd_list = [];
     }
-    var lines = reader.result.split("\n");
+    var lines = data.split("\n");
     var line;
     var this_etd;
     for (var line_num = 0; line_num < lines.length-1; line_num++) {
         try {
             line = lines[line_num];
             // If a log header is found
-            if (line.charAt(0) === "-" && (line_num + 7 < lines.length) && lines[line_num + 1].charAt(0) === 'E') {
+            if (line.charAt(0) === "-" && (line_num + 7 < lines.length)) {
                 // Parse the header
-                var id = lines[++line_num];
-                var firmware = lines[++line_num];
-                var cpld = lines[++line_num];
-                var sn = lines[++line_num];
-                var customer = lines[++line_num];
-                var turbine_time = lines[++line_num];
-                var battery_time = lines[++line_num];
-                //console.log(id + ", " + firmware + ", " + cpld + ", " + sn + ", " + customer + ", " + turbine_time + ", " + battery_time + ", ");
+                let parsedObject = {}
+                let selected_regex = []
+                let type = "";
+                if(lines[line_num + 1].match(repeater_header_regex[0].regex) != null){
+                    selected_regex = repeater_header_regex;
+                    type="repeater";
+                }else if(lines[line_num + 1].match(etd_header_regex[0].regex) != null){
+                    selected_regex = etd_header_regex;
+                    type="etd";
+                }
+                if(selected_regex.length == 0){
+                    throw new Error("Unit not recognized");
+                }
+                for(var x = 1;x<selected_regex.length;x++){
+                    let key = selected_regex[x].key;
+                    let regex = selected_regex[x].regex;
+                    let description = selected_regex[x].description;
+                    let match_index = selected_regex[x].match;
+                    let lines_after_header = selected_regex[x].lines_after_header;
+                    let match = lines[line_num+lines_after_header].match(regex);
+                    if(match != null && match[match_index] != undefined){
+                        parsedObject[key] = match[match_index];
+                        parsedObject[key + "_description"] = description;
+                        console.log("Parsing key " + key + " resulted in match of: " + match[match_index]);
+                    }else{
+                        console.log(match);
+                        console.warn("Parsing key " + key + " resulted in no match")
+                    }
+                }
+                line_num += (selected_regex[selected_regex.length-1].lines_after_header + 4);
+                console.log(lines[line_num]);
+                // var id = lines[++line_num];
+                // var firmware = lines[++line_num];
+                // var cpld = lines[++line_num];
+                // var sn = lines[++line_num];
+                // var customer = lines[++line_num];
+                // var turbine_time = lines[++line_num];
+                // var battery_time = lines[++line_num];
+                // //console.log(id + ", " + firmware + ", " + cpld + ", " + sn + ", " + customer + ", " + turbine_time + ", " + battery_time + ", ");
 
                 // Create a new etd Object
-                var new_etd = createNewEtd(id, firmware, cpld, sn, customer, turbine_time, battery_time);
-                // If the etd initialized successfully
-                if (new_etd) {
-                    // Scan existing ETDs for a match with the new ETD
-                    var match_found = false;
-                    for (var etd_num = 0; etd_num < etd_list.length; etd_num++) {
-                        var existing_etd = etd_list[etd_num];
-                        // If a match is found, set the existing ETD at this_etd
-                        if (new_etd.id === existing_etd.id
-                            && new_etd.firmware === existing_etd.firmware
-                            && new_etd.sn === existing_etd.sn) {
-                            match_found = true;
-                            this_etd = existing_etd;
-                            existing_etd.turbine_time = new_etd.turbine_time;
-                            existing_etd.battery_time = new_etd.battery_time;
-                            break;
+                if(type=="etd"){
+                    var new_etd = createNewEtd(parsedObject.id, parsedObject.firmware, parsedObject.cpld, parsedObject.sn, parsedObject.customer, parsedObject.turbine_time, parsedObject.battery_time);
+                    // If the etd initialized successfully
+                    console.log(new_etd);
+                    if (new_etd) {
+                        // Scan existing ETDs for a match with the new ETD
+                        var match_found = false;
+                        for (var etd_num = 0; etd_num < etd_list.length; etd_num++) {
+                            var existing_etd = etd_list[etd_num];
+                            // If a match is found, set the existing ETD at this_etd
+                            if (new_etd.id === existing_etd.id
+                                && new_etd.firmware === existing_etd.firmware
+                                && new_etd.sn === existing_etd.sn) {
+                                match_found = true;
+                                this_etd = existing_etd;
+                                existing_etd.turbine_time = new_etd.turbine_time;
+                                existing_etd.battery_time = new_etd.battery_time;
+                                break;
+                            }
                         }
-                    }
-                    // If an existing ETD could not be found, set the new ETD as this_etd
-                    if (match_found === false) {
-                        etd_list.push(new_etd);
-                        this_etd = new_etd;
-                        loadOptions(this_etd);
+                        // If an existing ETD could not be found, set the new ETD as this_etd
+                        if (match_found === false) {
+                            etd_list.push(new_etd);
+                            this_etd = new_etd;
+                            loadOptions(this_etd);
+                        }
                     }
                 }
             } else if (this_etd) {
