@@ -9,8 +9,95 @@ var noCommCircles = [];
 var repeatedCommCircles = [];
 var failureMarkers = [];
 
-// Iterate through each line of text in the file and create a point on either the 'noComms' or 'comms' heatmap
 function processFile(reader) {
+    let e = document.getElementById("product");
+    let product = e.options[e.selectedIndex].value;
+    if (product === "3030") {
+        process3030File(reader);
+    } else if (product === "8030") {
+        process8030File(reader);
+    }
+}
+
+// Iterate through each line of text in the file and create a point on either the 'noComms' or 'comms' heatmap
+function process3030File(reader) {
+    var lines = reader.result.split("\n");
+    var values;
+    var previousFailures = 0;
+    var firstFailPoint = [0, 0];
+
+    // Iterate over each line in the file
+    for (var i = 0; i < lines.length - 1; i++) {
+        try {
+            values = lines[i].split("\t");
+
+            // If the log is a 'Received EOT Packet' event
+            if (values[2] === '0x124') {
+
+                // Create a mark after reaching the end of a dead zone
+                if (previousFailures > 25) {
+                    let time = values[0].split(" ");
+                    var failLength = formatTime(time[0], time[1]) - formatTime(firstFailPoint[0], firstFailPoint[1]);
+
+
+                    if (Math.floor(failLength / 60000) >= 5) {
+                        let coords = values[1].split(",");
+                        var msg = "High failure rate near (" +
+                            formatCoordinates(coords[0]) + ", " +
+                            formatCoordinates(coords[1]) + ")\n " +
+                            previousFailures + " successive failures lasting " +
+                            (Math.floor(failLength / 60000)) + " minute(s) " + ((failLength / 1000) % 60) + " second(s)";
+
+                        let failureCoords = firstFailPoint[1].split(",");
+                        var failure = {
+                            lat: averageCoordinate(formatCoordinates(coords[0]), formatCoordinates(failureCoords[0])),
+                            lon: averageCoordinate(formatCoordinates(coords[1]), formatCoordinates(failureCoords[1])),
+                            failures: previousFailures,
+                            message: msg
+                        };
+
+                        failures.push(failure);
+                    }
+                }
+                previousFailures = 0;
+
+                // Add the location to the comms or repeatedComms list depending on if it was repeated
+                let data = values[3].split(",");
+                let coords = values[1].split(",");
+                //console.log(values[9].trim());
+                if (data.length > 9 && data[9] && data[9].trim() === "Repeated = YES") {
+                    repeatedComms.push({
+                        location: new google.maps.LatLng(formatCoordinates(coords[0]), formatCoordinates(coords[1]))
+                    });
+                } else {
+                    comms.push({
+                        location: new google.maps.LatLng(formatCoordinates(coords[0]), formatCoordinates(coords[1]))
+                    });
+                }
+
+                // If the log is a 'Comm Test Failed' event
+            } else if (values[5] === '0x514') {
+
+                // Ignore the first failure to reduce noise
+                if (previousFailures) {
+                    // Add the location to the noComm list
+                    let coords = values[1].split(",");
+                    noComms.push({
+                        location: new google.maps.LatLng(formatCoordinates(coords[0]), formatCoordinates(coords[1]))
+                    });
+                } else {
+                    firstFailPoint = values;
+                }
+                previousFailures++;
+            }
+        } catch (err) {
+            console.log("Skipped " + lines[i]);
+        }
+    }
+}
+
+// Iterate through each line of text in the file and create a point on either the 'noComms' or 'comms' heatmap
+function process8030File(reader) {
     var lines = reader.result.split("\n");
     var values;
     var previousFailures = 0;
@@ -31,10 +118,10 @@ function processFile(reader) {
 
                     if (Math.floor(failLength / 60000) >= 5) {
                         var msg = "High failure rate near (" +
-                            formatCoordinates(values[2]) + ", " +
-                            formatCoordinates(values[3]) + ")\n " +
-                            previousFailures + " successive failures lasting " +
-                            (Math.floor(failLength / 60000)) + " minute(s) " + ((failLength / 1000) % 60) + " second(s)";
+                          formatCoordinates(values[2]) + ", " +
+                          formatCoordinates(values[3]) + ")\n " +
+                          previousFailures + " successive failures lasting " +
+                          (Math.floor(failLength / 60000)) + " minute(s) " + ((failLength / 1000) % 60) + " second(s)";
 
                         var failure = {
                             lat: averageCoordinate(formatCoordinates(values[2]), formatCoordinates(firstFailPoint[2])),
