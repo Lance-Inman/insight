@@ -295,13 +295,13 @@ function addTable(device) {
     var deviceDropdown = document.createElement("div");
     deviceDropdown.setAttribute("class", "device-dropdown");
     var deviceButton = document.createElement("button");
-    deviceButton.appendChild(document.createTextNode("ID: " + device.unit_number + ", V: " + device.firmware + ", SN: " + device.serial_number));
+    deviceButton.appendChild(document.createTextNode("Device: " + device.device + ", ID: " + device.unit_number + ", V: " + device.firmware + ", SN: " + device.serial_number));
     deviceButton.onclick = function(){
-        toggleDropdown(device.unit_number+"."+device.firmware.replace('.', '')+"."+device.serial_number);  
+        toggleDropdown(device.device.replace(/ /g, "") + "." + device.unit_number+"."+device.firmware.replace('.', '')+"."+device.serial_number);  
     }
     deviceButton.setAttribute("class", "device-dropdown-trigger");
     var deviceDropdownContent = document.createElement("div");
-    deviceDropdownContent.setAttribute("id", (""+device.unit_number+"."+device.firmware.replace('.', '')+"."+device.serial_number));
+    deviceDropdownContent.setAttribute("id", ("" + device.device.replace(/ /g, "") + "." + device.unit_number+"."+device.firmware.replace('.', '')+"."+device.serial_number));
     deviceDropdownContent.setAttribute("class", "device-dropdown-content");
     deviceDropdown.appendChild(deviceButton);
     let graphSet = []
@@ -354,10 +354,10 @@ function addTable(device) {
         }else{
             hexButton.appendChild(document.createTextNode(hexToText[hex_code] + ": " + logs.length));
         }
-        hexButton.setAttribute("onclick", ("toggleDropdown(\""+(device.id+"."+device.firmware.replace('.', '')+"."+device.sn+"."+code_num)+"-graph" +"\")"));
+        hexButton.setAttribute("onclick", ("toggleDropdown(\""+(device.device.replace(/ /g, "") + "." + device.unit_number+"."+device.firmware.replace('.', '')+"."+device.serial_number+"."+code_num)+"-graph" +"\")"));
         hexButton.setAttribute("class", "hex-dropdown-trigger");
         var hexDropdownContent = document.createElement("div");
-        hexDropdownContent.setAttribute("id", (""+(device.id+"."+device.firmware.replace('.', '')+"."+device.sn+"."+code_num+"-graph")));
+        hexDropdownContent.setAttribute("id", (""+(device.device.replace(/ /g, "") + "." + device.unit_number+"."+device.firmware.replace('.', '')+"."+device.serial_number+"."+code_num+"-graph")));
         hexDropdownContent.setAttribute("class", "hex-dropdown-content");
         hexDropdown.appendChild(hexButton);
         // If the hex code is graphable we will make a different structure compared to if its not graphable - if you
@@ -366,10 +366,10 @@ function addTable(device) {
         if(graphable){
             //Create the toggle for the data below the graph
             showDataButton.setAttribute("class", "data-dropdown-trigger");
-            showDataButton.setAttribute("onclick", ("toggleDropdown(\""+(device.id+"."+device.firmware.replace('.', '')+"."+device.sn+"."+code_num)+"-data"+"\")"));
+            showDataButton.setAttribute("onclick", ("toggleDropdown(\""+(device.device.replace(/ /g, "") + "." + device.unit_number+"."+device.firmware.replace('.', '')+"."+device.serial_number+"."+code_num)+"-data"+"\")"));
             showDataButton.innerHTML = "Toggle Data";
             var dataDropDownContent = document.createElement("div");
-            dataDropDownContent.setAttribute("id", ("" + (device.id + "." + device.firmware.replace('.', '') + "." + device.sn + "." + code_num + "-data")));
+            dataDropDownContent.setAttribute("id", ("" + (device.device.replace(/ /g, "") + "." + device.unit_number + "." + device.firmware.replace('.', '') + "." + device.serial_number + "." + code_num + "-data")));
             dataDropDownContent.setAttribute("class", "hex-dropdown-content");
         }
         // Create a table and table header
@@ -1039,32 +1039,10 @@ function loadOptions(device) {
         device.addCode("0x139");
     }
     if(document.querySelector('input[value="critical"]').checked) {
-        device.addCode("0x1");
-        device.addCode("0x3");
-        device.addCode("0x4");
-        device.addCode("0x5");
-        device.addCode("0x6");
-        device.addCode("0x7");
-        device.addCode("0x8");
-        device.addCode("0x9");
-        device.addCode("0xA");
-        device.addCode("0xB");
-        device.addCode("0xC");
-        device.addCode("0xD");
-        device.addCode("0xE");
-        device.addCode("0xF");
-        device.addCode("0x10");
-        device.addCode("0x11");
-        device.addCode("0x12");
-        device.addCode("0x13");
-        device.addCode("0x14");
-        device.addCode("0x15");
-        device.addCode("0x16");
-        device.addCode("0x17");
-        device.addCode("0x1D");
-        device.addCode("0x12E");
-        device.addCode("0x13B");
-        device.addCode("0x13C");
+        // add codes 0x1 -> 0xFF
+        for(let x = 1;x<=255;x++){
+            device.addCode(x.toString(16).toUpperCase())
+        }
     }
 }
 //--------------------Creating extra element on 0x11A------------------------//
